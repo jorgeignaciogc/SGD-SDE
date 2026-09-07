@@ -1,0 +1,1632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stochastic Optimization, Langevin Dynamics, and Continuous Limits</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        MathJax = {
+            tex: {
+                inlineMath: [['$', '$']],
+                displayMath: [['$$', '$$']]
+            }
+        };
+    </script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:ital,wght@0,300;0,700;1,300&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+        }
+        
+        h1, h2, h3, h4, .serif {
+            font-family: 'Merriweather', serif;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 4px; }
+
+        .nav-link.active {
+            background-color: #1e293b;
+            border-left: 4px solid #4f46e5;
+            color: white;
+        }
+        
+        .math-box {
+            background-color: #f1f5f9;
+            border-left: 4px solid #94a3b8;
+            padding: 1.25rem;
+            border-radius: 0 0.5rem 0.5rem 0;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .vis-container {
+            width: 100%;
+            min-height: 450px;
+            background-color: #fff;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        @media (min-width: 1024px) { html { font-size: 17px; } }
+        @media (min-width: 1536px) { html { font-size: 18px; } }
+
+        .sidebar-collapsed {
+            margin-left: -18rem;
+            transform: translateX(-100%) !important;
+        }
+        @media (max-width: 767px) {
+            .sidebar-collapsed { margin-left: 0; }
+        }
+        
+        .controls-bar {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            background-color: #f1f5f9;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+            border: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .input-group label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #475569;
+        }
+        .input-group input[type="range"] {
+            width: 120px;
+        }
+        .input-group select {
+            font-size: 0.75rem;
+            padding: 0.25rem;
+            border-radius: 0.25rem;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .btn-action {
+            background-color: #4f46e5;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            border: none;
+        }
+        .btn-action:hover {
+            background-color: #4338ca;
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row min-h-screen">
+
+    <div class="md:hidden bg-slate-900 text-white p-4 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <h1 class="text-lg font-bold serif truncate">Stochastic Optimization & SDEs</h1>
+        <button id="mobile-menu-btn" class="text-2xl focus:outline-none px-2 py-1">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <aside id="sidebar" class="fixed md:sticky top-0 left-0 h-screen w-[80vw] md:w-72 max-w-[18rem] bg-slate-900 text-slate-300 z-50 md:z-40 sidebar-scroll overflow-y-auto shrink-0 shadow-2xl transition-all duration-300 ease-in-out transform -translate-x-full md:translate-x-0 flex flex-col">
+        <div class="p-6 pb-4 relative">
+            <button id="close-sidebar-btn" class="md:hidden absolute top-6 right-6 text-slate-400 hover:text-white text-xl focus:outline-none">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <h1 class="text-xl font-bold text-white serif leading-tight mb-3 pr-6">Stochastic Optimization & SDEs</h1>
+            <p class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Interactive Presentation</p>
+            <p class="text-xs text-slate-500 mt-2">Jorge Ignacio González Cázares (IIMAS-UNAM, Mexico)</p>
+        </div>
+        <nav class="flex-1 px-4 pb-6 space-y-1 mt-4" id="nav-menu">
+            <a href="#deterministic-foundations" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-compass-drafting text-sky-400 w-6"></i> 1. Deterministic Foundations</a>
+            <a href="#statistical-learning" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-brain text-rose-400 w-6"></i> 2. Statistical Learning</a>
+            <a href="#optimization-geometries" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-mountain text-emerald-400 w-6"></i> 3. Geometries & SGD</a>
+            <a href="#langevin-dynamics" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-atom text-indigo-400 w-6"></i> 4. Langevin Dynamics</a>
+            <a href="#stationary-reversibility" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-infinity text-purple-400 w-6"></i> 5. Stationary Measures</a>
+            <a href="#proof-methodologies" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-scale-balanced text-teal-400 w-6"></i> 6. Methodologies of Proof</a>
+            <a href="#continuous-limits" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-wave-square text-amber-400 w-6"></i> 7. Continuous Limits</a>
+            <a href="#references" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-book text-slate-400 w-6"></i> References</a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 w-full max-w-5xl mx-auto p-6 md:p-10 lg:p-14 overflow-x-hidden">
+        
+        <header class="mb-16 border-b border-slate-200 pb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 serif leading-tight mb-4">Machine Learning, Stochastic Optimization and Connections with SDEs</h1>
+            <p class="text-lg text-slate-600"><b>Jorge Ignacio González Cázares</b></p>
+        </header>
+
+        <!-- Part 1: Deterministic Optimization Foundations -->
+        <section id="deterministic-foundations" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-sky-600 font-bold tracking-wider uppercase text-sm">Part 1</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Deterministic Optimization Foundations</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    Before introducing stochasticity, we establish the classical mechanics of descending a potential landscape $L(\theta)$. 
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-arrow-down-short-wide text-sky-500 mr-2"></i> Gradient Descent & Gradient Flow</h3>
+                <div class="bg-sky-50 border-l-4 border-sky-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Gradient descent evaluates the local slope and takes a discrete step in the steepest downward direction. In the limit as the step size approaches zero, this discrete sequence traces a continuous path known as gradient flow, moving orthogonally to the contour lines of the landscape.
+                </div>
+                <div class="math-box">
+                    <strong>Gradient Descent:</strong> The parameter vector is updated iteratively via:
+                    $$ \theta_{n+1} = \theta_n - \eta \nabla L(\theta_n) $$
+                    If the objective $L$ is $M$-smooth (i.e., its gradient is $M$-Lipschitz continuous, $\|\nabla L(\theta) - \nabla L(\theta')\| \leqslant M\|\theta - \theta'\|$), a fixed learning rate $\eta \leqslant 1/M$ ensures monotonic descent and achieves a convergence rate of $L(\theta_n) - L(\theta^*) = \mathcal{O}(1/n)$ (Nesterov, 2004, "Introductory Lectures on Convex Optimization", Theorem 2.1.14).
+                    <hr class="my-3 border-slate-300">
+                    <strong>Gradient Flow:</strong> Taking the continuous-time limit $\eta \to 0$ transforms the difference equation into an ordinary differential equation (ODE):
+                    $$ \dot{\theta}(t) = -\nabla L(\theta(t)) $$
+                    This describes the macroscopic mean trajectory around which stochastic variations fluctuate.
+                </div>
+                
+                <div class="controls-bar">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Landscape:</strong> Himmelblau's function $L(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2$<br>
+                        <strong>Gradient:</strong> $\nabla L(x,y) = \begin{bmatrix} 4x(x^2+y-11)+2(x+y^2-7) \\ 2(x^2+y-11)+4y(x+y^2-7) \end{bmatrix}$
+                    </div>
+                    <div class="input-group">
+                        <label for="gd-lr">Learning Rate (η): <span id="gd-lr-val">0.02</span></label>
+                        <input type="range" id="gd-lr" min="0.001" max="0.08" step="0.001" value="0.02">
+                    </div>
+                    <div class="input-group">
+                        <label for="gd-steps">Steps: <span id="gd-steps-val">50</span></label>
+                        <input type="range" id="gd-steps" min="5" max="200" step="5" value="50">
+                    </div>
+                    <div class="input-group">
+                        <label for="gd-start-x">Start X: <span id="gd-start-x-val">-3.0</span></label>
+                        <input type="range" id="gd-start-x" min="-4" max="4" step="0.1" value="-3.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="gd-start-y">Start Y: <span id="gd-start-y-val">-2.0</span></label>
+                        <input type="range" id="gd-start-y" min="-4" max="4" step="0.1" value="-2.0">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawGDFlowSimulation()">Recalculate Trajectory</button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <div id="vis-gd-3d" class="vis-container h-[400px]"></div>
+                        <div class="text-sm text-center text-slate-500 mt-2 italic">3D view: The discrete steps of Gradient Descent (red) compared to the theoretical continuous flow (white) over the loss surface.</div>
+                    </div>
+                    <div>
+                        <div id="vis-gd-2d" class="vis-container h-[400px]"></div>
+                        <div class="text-sm text-center text-slate-500 mt-2 italic">2D view: Gradient flow moves orthogonally to the contours into the local basin of attraction.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-magnet text-sky-500 mr-2"></i> Newton's Method & High-Dimensional Bottlenecks</h3>
+                <div class="bg-sky-50 border-l-4 border-sky-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> While gradient descent relies on a flat tangent plane to select a direction, Newton's method approximates the landscape as a localized parabola, jumping directly to the bottom of that parabola in a single step. 
+                </div>
+                <div class="math-box">
+                    <strong>Newton Update:</strong> The step requires the inverse of the Hessian matrix $\nabla^2 L(\theta_n)$:
+                    $$ \theta_{n+1} = \theta_n - [\nabla^2 L(\theta_n)]^{-1} \nabla L(\theta_n) $$
+                    <strong>Kantorovich Theorem:</strong> Newton's method yields local quadratic convergence. If the Hessian is $M_2$-Lipschitz continuous and the objective is $\mu$-strongly convex in a neighborhood of the optimum $\theta^*$, the iterates satisfy:
+                    $$ \|\theta_{n+1} - \theta^*\| \leqslant C \|\theta_n - \theta^*\|^2 $$
+                    where the constant $C = \frac{M_2}{2\mu}$ is computed as the supremum of the Hessian's Lipschitz constant scaled by the inverse of the minimal curvature. This requires an initialization $\theta_0 \in \mathcal{N}$ within the basin of attraction such that $C\|\theta_0 - \theta^*\| < 1$ (Kantorovich, 1948, "Functional analysis and applied mathematics").
+                    <hr class="my-3 border-slate-300">
+                    <strong>The Bottleneck:</strong> In modern machine learning models with millions of parameters, constructing and inverting the $d \times d$ Hessian matrix imposes an $\mathcal{O}(d^3)$ computational cost per step, necessitating the reliance on first-order approximations.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-ruler-horizontal text-sky-500 mr-2"></i> Line Search & Bisection Methods</h3>
+                <div class="bg-sky-50 border-l-4 border-sky-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Evaluating the full $d$-dimensional gradient at every point is computationally expensive. Once a descent direction is chosen, we can freeze the direction and vary only the step size, reducing a high-dimensional problem to a 1D curve. We then use 1D root-finding methods (like bisection) to locate the lowest point along that curve.
+                </div>
+                <div class="math-box">
+                    <strong>Exact Line Search:</strong> Given a descent direction $p_n$ (e.g., $p_n = -\nabla L(\theta_n)$), we seek the step size $\eta$ that minimizes the loss along the ray:
+                    $$ \min_{\eta > 0} \phi(\eta) := L(\theta_n + \eta p_n) $$
+                    <strong>Bisection Method:</strong> For strictly convex loss functions, the directional derivative $\phi'(\eta) = \nabla L(\theta_n + \eta p_n)^\top p_n$ is increasing. Because $\phi'(0) < 0$, the optimal step size occurs where $\phi'(\eta) = 0$. This root can be found logarithmically fast via binary search (bisection) along the $\eta$ axis, bypassing the need for full multivariate evaluations at each test point (Nocedal & Wright, 2006, "Numerical Optimization", Section 3.1). In practice, weak Wolfe conditions often replace exact bisection to ensure sufficient decrease with minimal computational overhead.
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 2: Statistical Learning & Generalization -->
+        <section id="statistical-learning" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-rose-600 font-bold tracking-wider uppercase text-sm">Part 2</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Statistical Learning, Neural Networks & Generalization</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    Optimization in deep learning differs fundamentally from pure optimization because minimizing the training loss is merely an indirect means of achieving good predictive performance on unseen data.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-microchip text-rose-500 mr-2"></i> Function Classes & Empirical Risk Minimization</h3>
+                <div class="bg-rose-50 border-l-4 border-rose-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Why does machine learning reduce to optimization? To teach a computer to map inputs to outputs, we first select a "blank slate" (a specific family of mathematical functions controlled by tunable parameters). Learning is the act of twisting these parameter dials to find the specific function within the family that makes the fewest errors on average.
+                </div>
+                <div class="math-box">
+                    <strong>Neural Networks as Function Classes:</strong> A neural network defines a hypothesis class $\mathcal{H}$ through nested linear transformations and non-linear activation functions. For an input $x$, a feedforward network of depth $L$ is mathematically expressed as:
+                    $$ h_\theta(x) = W_L \sigma_{L-1}(W_{L-1} \dots \sigma_1(W_1 x + b_1) \dots + b_{L-1}) + b_L $$
+                    where the parameters $\theta$ encompass all weight matrices $W_k$ and bias vectors $b_k$. The functions $\sigma_k(\cdot)$ are component-wise non-linear activations (e.g., ReLU $\max(0, z)$, Sigmoid, or Tanh), allowing the network to approximate complex non-linear functions.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Transformers & Architecture Inductive Biases:</strong> Modern architectures like Transformers deviate from dense, fully connected layers to enforce specific inductive biases. Transformers utilize <em>Self-Attention</em> mechanisms to dynamically weight the spatial or sequential closeness of input tokens, computing transformations like:
+                    $$ \text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\top}{\sqrt{d}}\right)V $$
+                    This structural sparsity prevents the network from having to learn sequential relevance purely from data.
+                    <hr class="my-3 border-slate-300">
+                    <strong>The Optimization Objective:</strong> Given a loss function $\ell$ measuring prediction error, our ultimate goal is to find the parameter $\theta^*$ that minimizes the expected risk over the true, unknown data-generating distribution $\mathcal{D}$:
+                    $$ \theta^* = \arg\min_{\theta \in \mathbb{R}^d} \mathbb{E}_{(X,Y)\sim \mathcal{D}} [\ell(h_\theta(X), Y)] $$
+                    Because $\mathcal{D}$ is inaccessible, we replace the expected risk with Empirical Risk Minimization (ERM) calculated over a finite, observable training set $\mathcal{S} = \{(x_i, y_i)\}_{i=1}^N$:
+                    $$ \hat{\theta} = \arg\min_{\theta \in \mathbb{R}^d} \frac{1}{N} \sum_{i=1}^N \ell(h_\theta(x_i), y_i) $$
+                </div>
+                <div class="controls-bar mt-4">
+                    <button class="btn-action mx-auto" onclick="drawHypothesisSpace()">Redraw Hypothesis Space Diagram</button>
+                </div>
+                <div id="vis-architecture-loss" class="vis-container h-[400px]"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">A representation of Empirical Risk Minimization restricting the global search strictly to the parameterized hypothesis class.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-bullseye text-rose-500 mr-2"></i> The Generalization Problem & Flat Minima</h3>
+                <div class="bg-rose-50 border-l-4 border-rose-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Finding the absolute lowest point in the training data is problematic. If the algorithm memorizes the training data perfectly, the resulting minimum is often sharply defined. When tested on unseen data, a slight shift in the landscape causes the error to explode.
+                </div>
+                <div class="math-box">
+                    <strong>The Generalization Gap:</strong> The difference between the empirical risk $L(\theta)$ and the true population risk $J(\theta)$ is the generalization error. Reaching the exact global minimizer of $L(\theta)$ often causes severe overfitting. Algorithms whose inherent stochastic dynamics drive the parameters away from sharp empirical minima and into flat minima are preferred (Hochreiter & Schmidhuber, 1997, "Flat minima").
+                </div>
+                <div class="controls-bar mt-4">
+                    <button class="btn-action mx-auto" onclick="drawGeneralizationGap()">Redraw Population vs Empirical Risk</button>
+                </div>
+                <div id="vis-generalization" class="vis-container h-[500px]"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">The true Population Risk (blue) is smooth, but we only have access to the Empirical Risk (solid multi-color), which contains spurious sharp local minima generated by overfitting to finite training data. The Empirical Minimizer sits in a sharp trap, causing high generalization error on the true landscape.</div>
+            </div>
+        </section>
+
+        <!-- Part 3: Optimization Geometries & First-Order Methods -->
+        <section id="optimization-geometries" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-emerald-600 font-bold tracking-wider uppercase text-sm">Part 3</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Geometries & Stochastic Gradient Descent</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    Stochastic convergence guarantees rely heavily on the geometric assumptions of the loss landscape $\ell(\theta)$ and precise control of the noise sequence.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-mountain text-emerald-500 mr-2"></i> Loss Landscape Geometries</h3>
+                <div class="math-box">
+                    <strong>Strong Convexity:</strong> A function $\ell(\theta)$ is strongly convex if there exists $\mu > 0$ such that the Hessian satisfies $\nabla^2 \ell(\theta) \succeq \mu I$. This ensures a unique minimizer $\theta^*$ and convergence is evaluated by the distance to the optimum $\mathbb{E}[\|\theta_n - \theta^*\|^2]$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Polyak-Łojasiewicz (PL) Condition:</strong> Relaxing strict convexity, the PL condition (Polyak, 1963, "Gradient methods for the minimisation of functionals") states that the gradient norm bounds the suboptimality of the objective function:
+                    $$ \frac{1}{2}\|\nabla \ell(\theta)\|^2 \geqslant \mu (\ell(\theta) - \ell(\theta^*)) $$
+                    This permits non-convexity, allowing for continuous loci of global minima (e.g., flat valleys). If $\ell(\theta)$ is also $M$-smooth, gradient descent utilizing a fixed step size $\eta = 1/M$ still achieves a linear convergence rate: 
+                    $$ \ell(\theta_n) - \ell(\theta^*) \leqslant \left(1 - \frac{\mu}{M}\right)^n (\ell(\theta_0) - \ell(\theta^*)) $$
+                </div>
+                
+                <div class="controls-bar">
+                    <button class="btn-action mx-auto" onclick="drawGeometries()">Redraw Geometric Landscapes</button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <div id="vis-geom-convex" class="vis-container h-[400px]"></div>
+                        <div class="text-sm text-center text-slate-500 mt-2 italic">Strong Convexity ($f(x,y) = x^2 + y^2$) ensures a steep bowl with a single, easily locatable point of global minimum.</div>
+                    </div>
+                    <div>
+                        <div id="vis-geom-pl" class="vis-container h-[400px]"></div>
+                        <div class="text-sm text-center text-slate-500 mt-2 italic">The PL Condition ($f(x,y) = (y - x^2)^2$) accommodates flat, non-linear valleys where a continuous curve of points all represent valid global minima.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-shoe-prints text-emerald-500 mr-2"></i> Stochastic Gradient Descent (SGD) & Mini-Batches</h3>
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Exact empirical slopes require evaluating millions of data points per step. Instead, SGD descends the landscape via a randomly sampled slope computed on a small fraction of data. The learning rate must decay over time to dampen the resulting sampling noise.
+                </div>
+                <div class="math-box">
+                    <strong>Mini-Batch Estimation:</strong> In deep learning, calculating the exact empirical gradient requires evaluating every point:
+                    $$ \nabla L(\theta) = \frac{1}{N} \sum_{i=1}^N \nabla \ell(h_\theta(x_i), y_i) $$
+                    This is an expensive $\mathcal{O}(N)$ operation. We replace the true gradient with an unbiased estimator calculated over a small random subset $\mathcal{B} \subset \mathcal{S}$ of size $B$ (a <em>mini-batch</em>). This dramatically reduces computational cost per step while ensuring the expectation of the stochastic gradient matches the full-batch gradient: $\mathbb{E}[g_n \mid \mathcal{F}_n] = \nabla L(\theta_n)$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Update Rule:</strong> 
+                    $$ \theta_{n+1} = \theta_n - \eta_n g_n $$
+                    <strong>Convergence Conditions:</strong> Almost sure convergence to a local minimum demands that the stochastic gradient possesses bounded variance, $\mathbb{E}[\|g_n - \nabla L(\theta_n)\|^2 \mid \mathcal{F}_n] \leqslant \sigma^2$, and that the learning rates satisfy the Robbins-Monro conditions (Robbins & Monro, 1951, "A stochastic approximation method"):
+                    $$ \sum_{n=1}^\infty \eta_n = \infty \quad \text{and} \quad \sum_{n=1}^\infty \eta_n^2 < \infty $$
+                </div>
+                
+                <div class="controls-bar">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Landscape (4 Modes):</strong> $U(x) = -3e^{-5(x-2)^2} - 3e^{-5(x+2)^2} - 2.5e^{-0.5(x-6)^2} - 2.5e^{-0.5(x+6)^2} + 0.01x^2$<br>
+                        <strong>Gradient:</strong> $\nabla U(x) = 30(x-2)e^{-5(x-2)^2} + 30(x+2)e^{-5(x+2)^2} + 2.5(x-6)e^{-0.5(x-6)^2} + 2.5(x+6)e^{-0.5(x+6)^2} + 0.02x$
+                    </div>
+                    <div class="input-group">
+                        <label for="sgd-noise">Noise Level (σ): <span id="sgd-noise-val">2.0</span></label>
+                        <input type="range" id="sgd-noise" min="0.0" max="4.0" step="0.1" value="2.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="sgd-lr">Learning Rate: <span id="sgd-lr-val">0.10</span></label>
+                        <input type="range" id="sgd-lr" min="0.02" max="0.4" step="0.02" value="0.10">
+                    </div>
+                    <div class="input-group">
+                        <label for="sgd-start-x">Start Position: <span id="sgd-start-x-val">0.0</span></label>
+                        <input type="range" id="sgd-start-x" min="-10.0" max="10.0" step="0.5" value="0.0">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawSGDSimulation()">Recalculate Trajectory</button>
+                </div>
+                <div id="vis-sgd-trajectory" class="vis-container h-[400px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">The SGD path (red) escapes the suboptimal narrow minima at $\pm 2$ and wanders into the wider robust minima at $\pm 6$ due to the injected mini-batch variance.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-scissors text-emerald-500 mr-2"></i> Gradient Clipping & Heavy-Tailed Noise</h3>
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> While the variance from mini-batch sampling aids in escaping sharp minima, neural networks often exhibit heavy-tailed (infinite-variance) gradients. Large, abrupt jumps push the algorithm out of sharp valleys, but to prevent the algorithm from destabilizing entirely, we apply a hard speed limit (clipping).
+                </div>
+                <div class="math-box">
+                    <strong>Gradient Clipping:</strong> A standard technique to prevent explosive divergence is to truncate the gradient vector if its norm exceeds a threshold $c > 0$:
+                    $$ \hat{g}_n = g_n \min\left(1, \frac{c}{\|g_n\|}\right) $$
+                    <strong>Escaping Sharp Minima:</strong> Wang, Oh, and Rhee (2021, "Eliminating sharp minima from SGD with truncated heavy-tailed noise") demonstrated that heavy-tailed gradient noise, when combined with clipping, creates a state-dependent noise structure. This truncation mechanism actively drives the SGD trajectory away from sharp minima and funnels it into wider, flatter minima, improving out-of-sample generalization.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-layer-group text-emerald-500 mr-2"></i> Median of Means (MoM) Estimator</h3>
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> A challenge of gradient clipping is that the optimal clip threshold $c$ is difficult to determine. To achieve the same heavy-tail robustness without arbitrary parameter tuning, we can partition the mini-batch data and take the spatial median of the sub-gradients rather than the global mean.
+                </div>
+                <div class="math-box">
+                    <strong>The Escape Time Problem:</strong> The optimal clip size $c$ depends entirely on the minimal number of steps of size $c$ required to escape a specific basin of attraction. Computing this requires global topographical knowledge of the loss landscape, rendering systematic tuning impractical.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Tuning-Free Robustness:</strong> In ongoing work by Mario Molina and myself, we replace clipped mean estimation with a Median-of-Means (MoM) approach. By randomly partitioning the mini-batch into subgroups, computing the mean gradient of each subgroup, and taking the spatial median of those means, the estimator achieves asymptotic robustness to heavy-tailed noise. This neutralizes gradient explosions and preserves flat minima preferences without requiring the calculation of $c$.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-arrows-to-dot text-emerald-500 mr-2"></i> AdaGrad & First-Order Variations</h3>
+                <div class="math-box">
+                    <strong>AdaGrad Update Rule:</strong> (Duchi, Hazan, & Singer, 2011, "Adaptive Subgradient Methods", Theorem 5). Let $G_n = \sum_{t=1}^n g_t g_t^\top$ and let $G_{n, ii}$ be the accumulated squared gradient for coordinate $i$. The update scales coordinates inversely to their historical gradients to normalize ill-conditioned landscape curvatures:
+                    $$ \theta_{n+1, i} = \theta_{n, i} - \frac{\eta}{\sqrt{G_{n, ii} + \epsilon}} g_{n, i} $$
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-bolt text-emerald-500 mr-2"></i> Adam & Structural Divergence</h3>
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Adam combines Momentum and AdaGrad. Adam is not a second-order Newton proxy. The normalization term strips gradient magnitude rather than capturing true landscape curvature.
+                </div>
+                <div class="math-box">
+                    <strong>Adam Update Rule:</strong> (Kingma & Ba, 2014, "Adam: A Method for Stochastic Optimization"). With decay parameters $\beta_1, \beta_2 \in [0,1)$ and bias corrections $\hat{m}_n, \hat{v}_n$:
+                    $$ m_n = \beta_1 m_{n-1} + (1 - \beta_1) g_n \quad \implies \quad \hat{m}_n = m_n / (1 - \beta_1^n) $$
+                    $$ v_n = \beta_2 v_{n-1} + (1 - \beta_2) (g_n \odot g_n) \quad \implies \quad \hat{v}_n = v_n / (1 - \beta_2^n) $$
+                    $$ \theta_{n+1} = \theta_n - \frac{\eta}{\sqrt{\hat{v}_n} + \epsilon} \odot \hat{m}_n $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>Divergence & Vector Field Distortion:</strong> The exponential decay mechanism causes Adam to diverge or converge to suboptimal points in specific convex settings (Reddi, Kale, & Kumar, 2018, "On the Convergence of Adam and Beyond"). Furthermore, Adam does not universally converge to critical points ($\nabla \ell(\theta) = 0$). It instead converges to the roots of a distinct, algorithm-induced "Adam vector field" (Dereich & Jentzen, 2024, "Convergence rates for the Adam optimizer").
+                </div>
+                
+                <div class="controls-bar mt-4">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Elliptical Landscape with Local Minima:</strong> $U(x,y) = 0.02(x^2 + y^2) - c_1 \exp(-0.2(x-3)^2 - 0.8(y-3)^2) - c_2 \exp(-0.8(x+3)^2 - 0.2(y+3)^2)$<br>
+                        This presents a broad shallow bowl with two distinct, deep asymmetric pits.
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-c1">Depth Hill 1 (c₁): <span id="opt-c1-val">3.0</span></label>
+                        <input type="range" id="opt-c1" min="1.0" max="6.0" step="0.5" value="3.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-c2">Depth Hill 2 (c₂): <span id="opt-c2-val">2.0</span></label>
+                        <input type="range" id="opt-c2" min="1.0" max="6.0" step="0.5" value="2.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-lr">Learning Rate: <span id="opt-lr-val">0.1</span></label>
+                        <input type="range" id="opt-lr" min="0.01" max="1.0" step="0.01" value="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-start-x">Start X: <span id="opt-start-x-val">0.0</span></label>
+                        <input type="range" id="opt-start-x" min="-6.0" max="6.0" step="0.5" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-start-y">Start Y: <span id="opt-start-y-val">0.0</span></label>
+                        <input type="range" id="opt-start-y" min="-6.0" max="6.0" step="0.5" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-steps">Steps: <span id="opt-steps-val">150</span></label>
+                        <input type="range" id="opt-steps" min="50" max="500" step="10" value="150">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawOptimizers()">Recalculate Deterministic Paths</button>
+                </div>
+                <div id="vis-optimizers" class="vis-container h-[500px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 mb-8 italic">Full-batch deterministic trajectories across asymmetric local minima. Notice how Adam's spatial rescaling allows it to dive directly into deep basins, whereas Vanilla Gradient Descent struggles with flat regions and Momentum frequently overshoots the wells.</div>
+
+                <div class="controls-bar">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Stochastic Variants (Mini-Batch Simulation)</strong>
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-noise">Noise Std Dev: <span id="opt-noise-val">0.5</span></label>
+                        <input type="range" id="opt-noise" min="0.0" max="2.0" step="0.1" value="0.5">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawStochasticOptimizers()">Recalculate Stochastic Paths</button>
+                </div>
+                <div id="vis-stochastic-optimizers" class="vis-container h-[500px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">Stochastic optimization trajectories incorporating additive exogenous noise to simulate mini-batch estimation variance. Adam and Momentum trajectories maintain their structural navigation advantages over standard SGD despite the severe noise injections.</div>
+            </div>
+        </section>
+
+    	<!-- Part 4: Langevin Dynamics & Hamiltonian Principles -->
+        <section id="langevin-dynamics" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-indigo-600 font-bold tracking-wider uppercase text-sm">Part 4</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Langevin Dynamics & Hamiltonian Principles</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    Treating the loss function as a potential energy landscape $U(\theta) = L(\theta)$ maps discrete optimization updates to continuous-time physical systems.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-water text-indigo-500 mr-2"></i> Overdamped Langevin Dynamics (OLD)</h3>
+                <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> OLD models a particle's descent through a viscous medium where inertia is negligible. Exogenous Gaussian noise provides exploratory thermal energy.
+                </div>
+                <div class="math-box">
+                    <strong>Formal SDE:</strong> Let $U(\theta)$ be a regular potential function. Standard OLD is governed by:
+                    $$ \mathrm{d}\theta_t = -\nabla U(\theta_t)\mathrm{d}t + \sqrt{2T}\mathrm{d}W_t $$
+                    where $T>0$ is the temperature and $W_t$ is standard Brownian motion. Its stationary distribution is the canonical Gibbs measure $\pi(\theta) \propto \exp(-U(\theta)/T)$.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-meteor text-indigo-500 mr-2"></i> Underdamped Langevin & Hamiltonian Mechanics</h3>
+                <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Underdamped Langevin Dynamics (ULD) introduces momentum, allowing the particle to coast through shallow plateaus. ULD breaks the endless orbit of pure Hamiltonian flow through a fluctuation-dissipation balance.
+                </div>
+                <div class="math-box">
+                    <strong>Formal SDE:</strong> Let $\theta$ represent the position coordinates and $p$ represent the auxiliary momentum variables. For a mass matrix $M$, the Hamiltonian (total energy) is $H(\theta, p) = U(\theta) + \frac{1}{2} p^\top M^{-1} p$. The ULD acts as a stochastic perturbation of the pure Hamiltonian flow:
+                    $$ \mathrm{d}\theta_t = \nabla_p H(\theta_t, p_t)\mathrm{d}t = M^{-1}p_t \mathrm{d}t $$
+                    $$ \mathrm{d}p_t = -\nabla_\theta H(\theta_t, p_t)\mathrm{d}t - \gamma M^{-1}p_t \mathrm{d}t + \sqrt{2\gamma T}\mathrm{d}W_t $$
+                    where $\gamma > 0$ is the friction coefficient.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Connection to Optimization:</strong> The Stochastic Gradient Hamiltonian Monte Carlo (SGHMC) algorithm discretizes this system, yielding an update structurally identical to SGD with momentum, establishing a mapping between the friction coefficient $\gamma$ and the optimization momentum parameter $\beta$.
+                </div>
+                
+                <div class="controls-bar mt-4">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Double-Well Landscape:</strong> $U(x,y) = (x^2 - 4)^2 + c y^2$<br>
+                        <strong>Gradient:</strong> $\nabla U(x,y) = \begin{bmatrix} 4x(x^2 - 4) \\ 2cy \end{bmatrix}$
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-c">Steepness y-axis (c): <span id="ham-c-val">5.0</span></label>
+                        <input type="range" id="ham-c" min="1.0" max="15.0" step="1.0" value="5.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-start-x">Start X: <span id="ham-start-x-val">0.5</span></label>
+                        <input type="range" id="ham-start-x" min="-3.0" max="3.0" step="0.5" value="0.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-start-y">Start Y: <span id="ham-start-y-val">3.0</span></label>
+                        <input type="range" id="ham-start-y" min="-3.0" max="3.0" step="0.5" value="3.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-steps">Steps: <span id="ham-steps-val">1000</span></label>
+                        <input type="range" id="ham-steps" min="200" max="3000" step="100" value="1000">
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-dt">Step Size (dt): <span id="ham-dt-val">0.005</span></label>
+                        <input type="range" id="ham-dt" min="0.001" max="0.02" step="0.001" value="0.005">
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-temp">Temperature (T): <span id="ham-temp-val">0.5</span></label>
+                        <input type="range" id="ham-temp" min="0.0" max="2.0" step="0.1" value="0.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="ham-gamma">Friction (γ): <span id="ham-gamma-val">2.0</span></label>
+                        <input type="range" id="ham-gamma" min="0.1" max="5.0" step="0.1" value="2.0">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawHamiltonian()">Recalculate OLD vs ULD</button>
+                </div>
+                <div id="vis-hamiltonian" class="vis-container h-[500px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">OLD (dark red) diffuses slowly into the nearest minimum basin. ULD (orange) utilizes Hamiltonian momentum to coast and spiral dynamically, accelerating space exploration and crossing flat barriers.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-frog text-indigo-500 mr-2"></i> Lévy-Driven Langevin (L-OLD) for Heavy Tails</h3>
+                <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> To sample from heavy-tailed targets, continuous Brownian motion must be replaced with a jump process. Abrupt jumps periodically kick the state out of local traps.
+                </div>
+                <div class="math-box">
+                    <strong>Formal SDE:</strong> The Lévy-driven Overdamped Langevin equation replaces $W_t$ with a purely discontinuous Lévy process $L_t$ (e.g., an $\alpha$-stable process for $\alpha \in (0, 2)$):
+                    $$ \mathrm{d}\theta_t = -\nabla U(\theta_t) \mathrm{d}t + \mathrm{d}L_t $$
+                    The standard local differential generator $\mathcal{A}$ transitions into a non-local integro-differential operator:
+                    $$ \mathcal{A}f(\theta) = -\nabla U(\theta) \cdot \nabla f(\theta) + \int_{\mathbb{R}^d \setminus \{0\}} \left(f(\theta + x) - f(\theta) - \nabla f(\theta) \cdot x \mathbb{I}_{\|x\| \leqslant 1}\right) \nu(\mathrm{d}x) $$
+                    where $\nu$ is the jump measure of $L_t$.
+                </div>
+                
+                <div class="controls-bar">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Double Well Potential:</strong> $U(x) = x^4 - 4x^2 + 0.5x$<br>
+                        <strong>Gradient:</strong> $\nabla U(x) = 4x^3 - 8x + 0.5$
+                    </div>
+                    <div class="input-group">
+                        <label for="levy-alpha-1">Tail Index (α): <span id="levy-alpha-val-1">1.5</span></label>
+                        <input type="range" id="levy-alpha-1" min="1.1" max="2.0" step="0.1" value="1.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="levy-steps-1">Steps: <span id="levy-steps-val-1">500</span></label>
+                        <input type="range" id="levy-steps-1" min="100" max="1000" step="100" value="500">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawLangevinSimulation()">Recalculate Double Well Path</button>
+                </div>
+                <div id="vis-langevin-jumps-1" class="vis-container h-[400px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 mb-6 italic">The Brownian path (blue) becomes trapped in local basins, while the heavy-tailed Lévy path (orange) executes large jumps to traverse between modes.</div>
+
+                <div class="controls-bar mt-6">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Four-Mode Landscape:</strong> $U(x) = -3e^{-5(x-2)^2} - 3e^{-5(x+2)^2} - 2.5e^{-0.5(x-6)^2} - 2.5e^{-0.5(x+6)^2} + 0.01x^2$<br>
+                        <strong>Gradient:</strong> $\nabla U(x) = 30(x-2)e^{-5(x-2)^2} + 30(x+2)e^{-5(x+2)^2} + 2.5(x-6)e^{-0.5(x-6)^2} + 2.5(x+6)e^{-0.5(x+6)^2} + 0.02x$
+                    </div>
+                    <div class="input-group">
+                        <label for="levy-alpha-2">Tail Index (α): <span id="levy-alpha-val-2">1.5</span></label>
+                        <input type="range" id="levy-alpha-2" min="1.1" max="2.0" step="0.1" value="1.5">
+                    </div>
+                    <div class="input-group">
+                        <label for="levy-steps-2">Steps: <span id="levy-steps-val-2">500</span></label>
+                        <input type="range" id="levy-steps-2" min="100" max="1000" step="100" value="500">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawLangevinSimulation2()">Recalculate Four-Mode Path</button>
+                </div>
+                <div id="vis-langevin-jumps-2" class="vis-container h-[400px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">In a multi-modal setting, the Lévy-driven diffusion crosses extensive barriers that permanently confine standard Gaussian noise.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-map-location-dot text-indigo-500 mr-2"></i> Diffeomorphic MCMC for Heavy Tails</h3>
+                <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Instead of modifying the noise to match heavy tails (which degrades mixing speeds), we can warp the state space itself. By applying an invertible transformation (a diffeomorphism), we map a heavy-tailed target distribution into a light-tailed one.
+                </div>
+                <div class="math-box">
+                    <strong>Transformation Framework:</strong> Let the original heavy-tailed target measure be $\pi(\theta) \propto \exp(-U(\theta))$. We introduce a diffeomorphism $h: \mathbb{R}^d \to \mathbb{R}^d$ such that $\theta = h(\eta)$. The transformed target measure is $\tilde{\pi}(\eta) \propto \exp(-\tilde{U}(\eta))$, where the new potential includes the log-determinant of the Jacobian:
+                    $$ \tilde{U}(\eta) = U(h(\eta)) - \log |\det \nabla h(\eta)| $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>Transformation Recipe:</strong> If $U(\theta)$ grows logarithmically (e.g., $U(\theta) \sim \beta \log\|\theta\|$ resulting in heavy polynomial tails), we require a map $h(\eta)$ that compresses the space exponentially fast. An isotropic recipe defines $h(\eta) = \eta \cdot \exp(\|\eta\|^2)$. The heavy tails of $\pi(\theta)$ are consequently mapped to light, Gaussian-like tails in $\tilde{\pi}(\eta)$. Standard OLD applied to $\tilde{U}(\eta)$ achieves geometric ergodicity, and samples are mapped back via $h(\eta)$ (Brešar & Mijatović, 2026, "Diffeomorphic Markov Chain Monte Carlo").
+                </div>
+                
+                <div class="controls-bar mt-4">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Homeomorphism:</strong> Mapping latent grid $\eta \in \mathbb{R}^2$ to target space $\theta \in \mathbb{R}^2$<br>
+                        <strong>Transformation:</strong> $h(\eta) = \eta \exp(c \|\eta\|^2)$
+                    </div>
+                    <div class="input-group">
+                        <label for="diffeo-c">Expansion Rate (c): <span id="diffeo-c-val">0.10</span></label>
+                        <input type="range" id="diffeo-c" min="0.0" max="0.3" step="0.01" value="0.10">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawDiffeo()">Redraw Homeomorphism</button>
+                </div>
+                <div id="vis-diffeo" class="vis-container h-[400px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">Level sets of the isotropic potential (blue circles) map onto exponentially expanded level sets in the target space (red circles), visualizing how the diffeomorphism flattens heavy tails.</div>
+            </div>
+        </section>
+
+        <!-- Part 5: Stationary Densities & Reversibility -->
+        <section id="stationary-reversibility" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-purple-600 font-bold tracking-wider uppercase text-sm">Part 5</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Stationary Densities & Reversibility</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    To prove that the canonical Gibbs measure serves as the stationary density for Langevin systems, we analyze the structure of their infinitesimal generators using resolvents and formal self-adjointness criteria.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-anchor text-purple-500 mr-2"></i> Stationarity and the Infinitesimal Generator</h3>
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> A distribution $\pi$ is stationary if the expected value of any observable function remains constant over time. If the generator annihilates the measure, the flow of probability is balanced.
+                </div>
+                <div class="math-box">
+                    <strong>Stationarity Theorem:</strong> A probability measure $\pi$ is an invariant measure for a Markov process with generator $\mathcal{A}$ if and only if for all bounded, smooth functions $f \in C^\infty_b$ (assuming $C^\infty_b$ is a core for the generator):
+                    $$ \int \mathcal{A} f(x) \pi(x) \mathrm{d}x = 0 \quad \text{i.e.,} \quad \pi \mathcal{A} = 0 $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>Proof via Resolvents:</strong> To establish that $\pi \mathcal{A} = 0 \implies \pi P_t = \pi$, we utilize the resolvent operator $R_\lambda f = \int_0^\infty e^{-\lambda t} P_t f \mathrm{d}t$ for $\lambda > 0$. The resolvent equation states that $\lambda R_\lambda f - f = \mathcal{A} R_\lambda f$. Integrating both sides with respect to $\pi$ yields:
+                    $$ \int (\lambda R_\lambda f - f) \mathrm{d}\pi = \int \mathcal{A} R_\lambda f \mathrm{d}\pi $$
+                    Because $\pi \mathcal{A} = 0$ and $R_\lambda f$ lies in the domain of the generator, the right side vanishes. Consequently, $\lambda \int R_\lambda f \mathrm{d}\pi = \int f \mathrm{d}\pi$. By the uniqueness of the Laplace transform, this guarantees that $\int P_t f \mathrm{d}\pi = \int f \mathrm{d}\pi$ for all $t \geqslant 0$, proving $\pi$ is stationary.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-rotate-left text-purple-500 mr-2"></i> Reversibility and Self-Adjointness</h3>
+                <div class="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> A stochastic process is reversible if it looks statistically identical when played backwards in time. This occurs when there is no net flow of probability between any two states, known as detailed balance. 
+                </div>
+                <div class="math-box">
+                    <strong>Inner Product:</strong> Define the inner product with respect to the measure $\pi$:
+                    $$ \langle f, g \rangle_\pi := \int f(x)g(x)\pi(x) \mathrm{d}x $$
+                    <strong>Theorem:</strong> A process is $\pi$-reversible if and only if its generator $\mathcal{A}$ is self-adjoint in $L^2(\pi)$, meaning $\langle f, \mathcal{A} g \rangle_\pi = \langle \mathcal{A} f, g \rangle_\pi$. All such reversible processes have the invariant density $\pi$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Proof:</strong> Detailed balance equates to the symmetry of the transition semigroup: $\langle f, P_t g \rangle_\pi = \langle P_t f, g \rangle_\pi$. Differentiating this relation at $t=0$ yields the self-adjointness of the generator: $\langle f, \mathcal{A} g \rangle_\pi = \langle \mathcal{A} f, g \rangle_\pi$. To prove that reversibility implies stationarity, we substitute $f=1$. Because the generator satisfies $\mathcal{A}(1) = 0$, the self-adjoint property enforces:
+                    $$ \langle 1, \mathcal{A} g \rangle_\pi = \langle \mathcal{A}(1), g \rangle_\pi = 0 $$
+                    Thus $\int \mathcal{A}g(x)\pi(x)\mathrm{d}x = 0$, satisfying the Stationarity Theorem.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-check-double text-purple-500 mr-2"></i> Verifying Reversibility in OLD and ULD</h3>
+                <div class="math-box">
+                    <strong>OLD is Reversible:</strong> The OLD generator is $\mathcal{A}_{OLD} f = -\nabla U \cdot \nabla f + T \Delta f$. We check symmetry in $L^2(\pi)$ where $\pi \propto \exp(-U/T)$:
+                    $$ \langle g, \mathcal{A}_{OLD} f \rangle_\pi = \int g (-\nabla U \cdot \nabla f + T \Delta f) e^{-U/T} \mathrm{d}x $$
+                    Applying integration by parts to the Laplacian term:
+                    $$ T \int g \Delta f e^{-U/T} \mathrm{d}x = -T \int \nabla g \cdot \nabla f e^{-U/T} \mathrm{d}x - T \int g \nabla f \cdot \nabla (e^{-U/T}) \mathrm{d}x $$
+                    Because $\nabla (e^{-U/T}) = -\frac{1}{T} \nabla U e^{-U/T}$, the last term evaluates to $\int g \nabla f \cdot \nabla U e^{-U/T} \mathrm{d}x$, which cancels the drift component. We are left with:
+                    $$ \langle g, \mathcal{A}_{OLD} f \rangle_\pi = -T \int \nabla f \cdot \nabla g e^{-U/T} \mathrm{d}x $$
+                    This form is symmetric in $f$ and $g$, proving $\mathcal{A}_{OLD}$ is self-adjoint and OLD is $\pi$-reversible.
+                    <hr class="my-3 border-slate-300">
+                    <strong>ULD Invariant Density:</strong> The ULD generator is $\mathcal{A}_{ULD} = \mathcal{A}_{Ham} + \mathcal{A}_{FD}$, where $\mathcal{A}_{Ham} f = \nabla_p H \cdot \nabla_\theta f - \nabla_\theta H \cdot \nabla_p f$ and $\mathcal{A}_{FD} f = \gamma \left( T \Delta_p f - \nabla_p H \cdot \nabla_p f \right)$.
+                    <br><br>
+                    To prove that $\pi(\theta, p) \propto \exp(-H(\theta,p)/T)$ is the invariant density, we apply the Fokker-Planck adjoint operator $\mathcal{A}^*_{ULD}$ to $\pi$. The system decomposes into two independent annihilations:
+                    <ul class="list-disc ml-6 mt-2 space-y-2">
+                        <li><strong>Hamiltonian Flow:</strong> $\mathcal{A}^*_{Ham} \pi = -\nabla_\theta \cdot (\pi \nabla_p H) + \nabla_p \cdot (\pi \nabla_\theta H)$. By Liouville's theorem, this evaluates identically to $0$.</li>
+                        <li><strong>Fluctuation-Dissipation:</strong> $\mathcal{A}^*_{FD} \pi = \gamma \nabla_p \cdot \left( \pi \nabla_p H + T \nabla_p \pi \right)$. Direct substitution of $\pi$ shows that $T \nabla_p \pi = -\pi \nabla_p H$, causing the term inside the divergence to vanish identically.</li>
+                    </ul>
+                    Because $\mathcal{A}^*_{ULD} \pi = 0$, the target measure is invariant.
+                    <br><br>
+                    <strong>Momentum-Reversibility and Marginal Equivalence:</strong> By evaluating the inner product $\langle f, \mathcal{A}_{Ham} g \rangle_\pi$, integration by parts reveals that the Hamiltonian flow is anti-symmetric ($\mathcal{A}_{Ham}^* = -\mathcal{A}_{Ham}$). Consequently, ULD is not reversible; detailed balance holds only under the simultaneous time-reversal and momentum flip $p \mapsto -p$. Regardless of this phase-space anti-symmetry, integrating out the Gaussian momentum variables $\exp(-p^\top M^{-1} p / 2T)$ from the joint invariant measure yields the marginal spatial density:
+                    $$ \pi(\theta) \propto \exp(-U(\theta)/T) $$
+                    which matches the invariant density of OLD.
+                </div>
+            </div>
+        </section>
+
+        <!-- Part 6: Methodologies of Proof -->
+        <section id="proof-methodologies" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-teal-600 font-bold tracking-wider uppercase text-sm">Part 6</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Methodologies of Proof</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    Theoretical guarantees for stochastic optimization and Langevin sampling hinge on mathematical frameworks. We distinguish between conditions that guarantee exact almost sure convergence (via supermartingales) and those establishing invariant measures and mixing times via generalized Lyapunov drift inequalities.
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-stairs text-teal-500 mr-2"></i> Robbins-Monro Stochastic Approximation</h3>
+                <div class="math-box">
+                    <strong>Formal Definition:</strong> The goal is to find the root $\theta^*$ of an equation $h(\theta) = 0$. When $h(\theta)$ can only be observed via a noisy estimator $H(\theta_n, \xi_{n+1})$ satisfying $\mathbb{E}[H(\theta_n, \xi_{n+1}) \mid \mathcal{F}_n] = h(\theta_n)$, the Robbins-Monro recursion is:
+                    $$ \theta_{n+1} = \theta_n - \eta_n H(\theta_n, \xi_{n+1}) $$
+                    where step sizes must satisfy the classical infinite reach and bounded variance conditions (Robbins & Monro, 1951, "A stochastic approximation method", Equation 2): $\sum \eta_n = \infty$ and $\sum \eta_n^2 < \infty$.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-arrow-trend-down text-teal-500 mr-2"></i> Robbins-Siegmund Almost Supermartingale Theorem</h3>
+                <div class="bg-teal-50 border-l-4 border-teal-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Doob's martingale convergence theorem states that any non-negative supermartingale (a system that only loses energy on average) must eventually converge to a finite limit. Optimization algorithms are not strict supermartingales; the stochastic noise occasionally injects "bad" energy, increasing the distance to the optimum. The Robbins-Siegmund theorem mathematically bounds this: as long as these upward energy injections are globally summable over infinite time, the system is guaranteed to "cool down" and converge almost surely.
+                </div>
+                <div class="math-box">
+                    <strong>Formal Property:</strong> For a filtration $\mathcal{F}_n$ and non-negative $\mathcal{F}_n$-measurable variables $V_n, a_n, b_n, c_n$, the conditional drift inequality is (Robbins & Siegmund, 1971, "A convergence theorem", Theorem 1):
+                    $$ \mathbb{E}[V_{n+1} \mid \mathcal{F}_n] \leqslant (1 + a_n)V_n - b_n + c_n $$
+                    If $\sum a_n < \infty$ and $\sum c_n < \infty$ almost surely, then $V_n \xrightarrow{\text{a.s.}} V_\infty < \infty$ and $\sum b_n < \infty$ almost surely. 
+                    <hr class="my-3 border-slate-300">
+                    <strong>Proof Outline:</strong> We use a localization argument to handle potential non-integrability. Define the stopping time:
+                    $$ \tau_M = \inf\left\{n \geqslant 0 : V_0 > M \text{ or } \sum_{k=0}^n a_k > M \text{ or } \sum_{k=0}^n c_k > M\right\} $$
+                    Because $\tau_M$ does not depend on the forward evolution of $V_n$, the hypotheses $\sum a_n < \infty$ and $\sum c_n < \infty$ ensure that $\mathbb{P}(\cup_M \{\tau_M = \infty\}) = 1$. Let $\tilde{V}_n = V_{n \wedge \tau_M}$, and similarly halt the coefficients to define $\tilde{a}_n, \tilde{b}_n, \tilde{c}_n$. We construct the integrating factor $A_n = \prod_{k=0}^{n-1}(1+\tilde{a}_k) \leqslant e^M$ and define the transformed process:
+                    $$ W_n = \frac{\tilde{V}_n}{A_n} + \sum_{k=0}^{n-1} \frac{\tilde{b}_k}{A_{k+1}} + \mathbb{E}\left[ \sum_{k=n}^\infty \frac{\tilde{c}_k}{A_{k+1}} \mathrel{\Big|} \mathcal{F}_n \right] $$
+                    Taking the conditional expectation $\mathbb{E}[W_{n+1} \mid \mathcal{F}_n]$ and applying the drift inequality shows that $W_n$ is a non-negative supermartingale. By Doob's martingale convergence theorem, $W_n$ converges to a finite limit almost surely. 
+                    <br><br>
+                    To prove the summability of $b_n$, take the unconditional expectation of the stopped drift inequality: 
+                    $$ \mathbb{E}[\tilde{V}_{n+1}] \leqslant \mathbb{E}[\tilde{V}_n] + \mathbb{E}[\tilde{a}_n \tilde{V}_n] - \mathbb{E}[\tilde{b}_n] + \mathbb{E}[\tilde{c}_n] $$
+                    Summing this from $n=0$ to $N$ telescopes the $V$ terms, yielding:
+                    $$ \sum_{n=0}^N \mathbb{E}[\tilde{b}_n] \leqslant \mathbb{E}[V_0] - \mathbb{E}[\tilde{V}_{N+1}] + \sum_{n=0}^N \left(\mathbb{E}[\tilde{a}_n \tilde{V}_n] + \mathbb{E}[\tilde{c}_n]\right) $$
+                    Because $\tilde{V}_n$ converges to a finite random variable (ensuring $\sup_n \mathbb{E}[\tilde{a}_n \tilde{V}_n] < \infty$ since $\sum \tilde{a}_n \leqslant M$) and $\sum \tilde{c}_n \leqslant M$, the right-hand side is uniformly bounded above for all $N$. Taking the limit as $N \to \infty$ proves that $\mathbb{E}[\sum_{n=0}^\infty \tilde{b}_n] < \infty$, which guarantees that $\sum_{n=0}^\infty \tilde{b}_n < \infty$ almost surely. Because the stopping time $\tau_M$ eventually goes to infinity, the unstopped process $V_n$ converges to a finite limit $V_\infty$ and $\sum b_n < \infty$ almost surely.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Application to SGD (Convergence to Zero):</strong> Setting the Lyapunov sequence to $V_n = \|\theta_n - \theta^*\|^2$, the deterministic descent is captured by $b_n \propto \eta_n \|\nabla L(\theta_n)\|^2$. By the theorem, we obtain $\sum_{n=0}^\infty \eta_n \|\nabla L(\theta_n)\|^2 < \infty$ almost surely. Given the Robbins-Monro requirement that $\sum \eta_n = \infty$, the gradient must visit zero infinitely often, enforcing $\liminf_{n \to \infty} \|\nabla L(\theta_n)\| = 0$. Under strict convexity, this guarantees a subsequence $\theta_{n_k}$ converges to $\theta^*$, yielding $V_{n_k} \to 0$. Since the entire sequence $V_n$ is guaranteed by Robbins-Siegmund to converge to a single, finite limit $V_\infty$, the existence of a subsequence converging to $0$ dictates that $V_\infty = 0$. The sequence collapses onto the optimum.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-arrows-spin text-teal-500 mr-2"></i> Lyapunov Drift Upper Bounds (Discrete & Continuous)</h3>
+                <div class="bg-teal-50 border-l-4 border-teal-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> For continuous-time Markov chains or constant step-size optimization, the noise never completely vanishes. The process reaches a stationary distribution by balancing a strong inward drift from the boundaries against thorough mixing in the center. The landscape's geometry dictates this convergence speed.
+                </div>
+                <div class="math-box">
+                    <strong>Small and Petite Sets:</strong> A set $C \in \mathcal{B}(\mathcal{X})$ is a <em>small set</em> if there exists a time $t > 0$, a constant $\epsilon > 0$, and a probability measure $\nu$ such that the transition kernel satisfies $P_t(x, B) \geqslant \epsilon \nu(B)$ for all $x \in C$ and measurable sets $B$. A set $C$ is a <em>petite set</em> if there exist a probability measure $a$ on $\mathcal{B}(\mathbb{R}_{+})$ and a non-trivial finite measure $\nu_a$ such that $\int_{0}^{\infty}\mathbb{P}_{x}(X_{t}\in\cdot)a(\mathrm{d}t)\geqslant\nu_{a}(\cdot)$ for all $x\in C$ (Meyn & Tweedie, 1993, "Markov Chains and Stochastic Stability", Chapter 5).
+                    <hr class="my-3 border-slate-300">
+                    <strong>Connection to the Martingale Problem:</strong> The drift condition is fundamentally linked to the martingale problem for the generator $\mathcal{A}$. If the condition were an equality, $\mathcal{A}V(\theta) = 0$, the process $V(X_t)$ would be a local martingale. The inequality $\mathcal{A}V(\theta) \leqslant -\phi(V(\theta)) + b \mathbb{I}_C(\theta)$ therefore measures how far the system's energy $V(X_t)$ is from being a martingale, forcing it to be a supermartingale (actively dissipating energy) whenever the process wanders outside the central set $C$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Discrete-Time Drift Bound in $f$-Variation:</strong> For a discrete-time Markov chain with transition kernel $P$, upper bounds on convergence to an invariant measure $\pi$ are established using $f$-variation. For a function $f \geqslant 1$, the $f$-norm measures the distributional discrepancy as:
+                    $$ \|\mu - \nu\|_f = \sup_{|g| \leqslant f} \left| \int g \mathrm{d}\mu - \int g \mathrm{d}\nu \right| $$
+                    If there exists a continuous Lyapunov function $V \geqslant 1$, a concave rate function $\phi \geqslant f$, a small set $C$, and a constant $b > 0$ such that (Tuominen & Tweedie, 1994; Douc, Moulines, Priouret, & Soulier, 2018):
+                    $$ P V(\theta) - V(\theta) \leqslant -\phi(V(\theta)) + b \mathbb{I}_C(\theta) $$
+                    Then the convergence to the invariant measure $\pi$ is bounded by:
+                    $$ \|\mathbb{P}_x(X_n \in \cdot) - \pi(\cdot)\|_f \leqslant \frac{C V(x)}{r_\star(n)} $$
+                    where $r_\star(n) = \phi(H_\phi^{-1}(n))$ and $H_\phi(u) = \int_1^u \frac{1}{\phi(s)}\mathrm{d}s$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Continuous-Time Drift Theorem:</strong> For continuous-time processes, the differential generator condition is identically structured (Douc, Fort, & Guillin, 2009, "Subgeometric rates of convergence", Theorem 3.2):
+                    $$ \mathcal{A}V(\theta) \leqslant -\phi(V(\theta)) + b \mathbb{I}_C(\theta) $$
+                    Yielding the continuous-time bound $\|\mathbb{P}_x(X_t \in \cdot) - \pi(\cdot)\|_f \leqslant \frac{C V(x)}{r_\star(t)}$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>Proof Outline:</strong> The proof relies on excursion theory and coupling. The drift condition guarantees that, outside the set $C$, the process $V(X_t)$ acts as a supermartingale that decreases at rate $\phi(V)$. Applying Dynkin's formula yields upper bounds on the expected return times to $C$. Once return times are controlled, Nummelin splitting (or generalized coupling) is used to bound the distance to stationarity directly by the tails of these return times.
+                </div>
+            </div>
+
+            <div class="bg-indigo-900 text-white p-6 rounded-xl shadow-lg mb-8 relative overflow-hidden">
+                <h3 class="text-xl font-bold mb-3 border-b border-indigo-700 pb-2"><i class="fa-solid fa-code-compare text-amber-400 mr-2"></i> The Fundamental Connection: Point vs. Distributional Convergence</h3>
+                <p class="text-sm text-indigo-200 mb-4">Both the Robbins-Siegmund theorem and the Foster-Lyapunov drift criteria share a mathematically identical core: they bound the expected forward evolution of an energy function $V(x)$. The divergence lies in the asymptotic behavior of the noise.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                    <div class="bg-indigo-950 p-4 rounded border border-indigo-800">
+                        <strong class="text-amber-400 block mb-2">Robbins-Siegmund (Optimization)</strong>
+                        The noise term is bound by a sequence $c_n$. Because optimization decays the learning rate, the variance sequence is summable ($\sum c_n < \infty$). The energy injections vanish over time, allowing the system to "cool down" entirely and converge almost surely to a singular point mass (the optimum).
+                    </div>
+                    <div class="bg-indigo-950 p-4 rounded border border-indigo-800">
+                        <strong class="text-teal-400 block mb-2">Foster-Lyapunov (Markov Chains)</strong>
+                        The noise term is bound by $b \mathbb{I}_C(\theta)$. In a constant step-size process or an SDE, the noise variance never decays. This indicator function acts as a permanent, non-summable injection of energy every time the process enters the center. The system does not cool to a point, yielding distributional convergence to an invariant measure $\pi$.
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border-t-4 border-teal-500 shadow-sm flex flex-col mb-8">
+                <h3 class="text-lg font-bold text-slate-800 mb-3"><i class="fa-solid fa-weight-hanging text-teal-500 mr-2"></i> Subexponential Lower Bounds (Opposite Condition)</h3>
+                <div class="bg-teal-50 border-l-4 border-teal-400 p-3 mb-4 rounded-r-lg text-sm">
+                    <strong>Intuition:</strong> When the potential is weakly confining, the restoring force is overpowered by noise. The process wanders, return times become heavy-tailed, and exponential ergodicity breaks.
+                </div>
+                <div class="math-box text-sm m-0 flex-1">
+                    <strong>Submartingale Resistance:</strong> (Brešar & Mijatović, 2024, "Subexponential lower bounds for f-ergodic Markov processes", Theorem 2.1). To rule out a spectral gap and establish subexponential mixing rates, one must identify $V$ and rate functions $\varphi, \Psi$ where, outside a compact set:
+                    $$ \frac{1}{V(X_t)} - \int_0^t \varphi\left(\frac{1}{V(X_s)}\right)\mathrm{d}s $$
+		            is a supermartingale and
+                    $$ \Psi(V(X_t)) $$
+                    is a submartingale. This proves the process resists returning to the center.
+                </div>
+            </div>
+            
+            <div class="controls-bar">
+                <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                    <strong>Select Potential:</strong> 
+                    <select id="ergo-potential">
+                        <option value="log">Logarithmic: U(θ) = ln(1 + θ²)</option>
+                        <option value="sqrt">Square Root: U(θ) = √|θ|</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="ergo-dt">Step Size (dt): <span id="ergo-dt-val">0.0500</span></label>
+                    <input type="range" id="ergo-dt" min="-4.0" max="-0.5" step="0.1" value="-1.3">
+                </div>
+                <div class="input-group">
+                    <label for="ergo-samples">Samples/Batch: <span id="ergo-samples-val">20000</span></label>
+                    <input type="range" id="ergo-samples" min="5000" max="50000" step="5000" value="20000">
+                </div>
+                <div class="input-group">
+                    <label for="ergo-delay">Delay Steps: <span id="ergo-delay-val">50</span></label>
+                    <input type="range" id="ergo-delay" min="10" max="200" step="10" value="50">
+                </div>
+                <div class="input-group">
+                    <label for="ergo-batches">Evaluation Batches: <span id="ergo-batches-val">5</span></label>
+                    <input type="range" id="ergo-batches" min="1" max="10" step="1" value="5">
+                </div>
+                <button class="btn-action ml-auto" onclick="drawErgodicitySimulation()">Recalculate Ergodicity</button>
+            </div>
+            <div id="vis-ergodicity" class="vis-container h-[400px] mt-4"></div>
+            <div class="text-sm text-center text-slate-500 mt-2 italic">The empirical Kernel Density Estimate (KDE) of a single trajectory is computed over sequential time windows. The later batches (darker lines) progressively align with the theoretical invariant measure $\pi$ (green curve). Thinning reduces correlation. Notice that for the square root potential, the Empirical Measure struggles to match the theoretical density exactly at the sharp mode ($\theta = 0$). This is an artifact of the Euler-Maruyama discretization: the gradient of $\sqrt{|\theta|}$ approaches infinity near zero, causing numerical instability (large artificial jumps) that locally depletes the probability mass at the singularity. Lowering the discretization step size $dt$ mitigates this effect.</div>
+        </section>
+        
+        <!-- Part 7: Continuous-Time Limits & Heavy-Tailed Scaling -->
+        <section id="continuous-limits" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <span class="text-amber-500 font-bold tracking-wider uppercase text-sm">Part 7</span>
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Continuous-Time Limits & Heavy-Tailed Scaling</h2>
+                <p class="text-base text-slate-600 leading-relaxed">
+                    By scaling the learning rate towards zero, discrete optimization steps coalesce into continuous differential equations. Analyzing the fluctuations around this limit reveals the precise physical nature of the algorithm's noise (whether it diffuses like Gaussian heat or explodes in heavy-tailed jumps).
+                </p>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-compress text-amber-500 mr-2"></i> Finite Variance Limits: LLN and CLT</h3>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Shrinking the learning rate strips away the stochastic noise, leaving the macroscopic mean trajectory of the algorithm (the Law of Large Numbers limit). If we subtract this smooth path from the noisy discrete steps and magnify the difference by a standard factor of $1/\sqrt{\eta}$, we uncover the Central Limit Theorem diffusion (Gaussian fluctuations reacting to the local curvature).
+                </div>
+                <div class="math-box">
+                    <strong>LLN Gradient Flow:</strong> As the learning rate $\eta \to 0$, the scaled SGD trajectory converges almost surely to the deterministic gradient flow ODE:
+                    $$ \dot{\theta}(t) = -\nabla L(\theta(t)) $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>CLT Diffusion Limit:</strong> When the stochastic gradient possesses finite variance, the final iterate converges as $\sqrt{\eta_n^{-1}}(\theta_n - \theta^*) \Rightarrow \mathcal{N}(0, \Sigma)$. This asymptotic normal distribution is the stationary distribution of an Ornstein-Uhlenbeck (OU) process driven by standard Brownian motion (Kushner & Clark, 1978, "Stochastic Approximation Methods"):
+                    $$ \mathrm{d}Z_t = -\mathbb{E}[\nabla^2 l(\theta^*, \xi)]Z_t \mathrm{d}t + \Gamma^{1/2} \mathrm{d}B_t $$
+                    where $\Gamma = \text{Cov}(l(\theta^*, \xi), \nabla l(\theta^*, \xi))$ represents the localized noise covariance.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-link text-amber-500 mr-2"></i> Bridging SGD and Langevin Dynamics</h3>
+                <div class="math-box">
+                    <strong>Langevin Approximation:</strong> Cheng, Yin, Bartlett, & Jordan (2020, "Stochastic Gradient and Langevin Processes") establish that the trajectory of SGD can be approximated by the continuous-time Overdamped Langevin process. By bounding the Wasserstein distance between the discrete iterates and the continuous diffusion, they prove that SGD inherits the continuous-time mixing properties and convergence guarantees of Langevin systems, allowing us to map optimization rates to diffusion spectral gaps.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-burst text-amber-500 mr-2"></i> The Heavy-Tail Phenomenon & Fractal Geometry</h3>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Removing or adding a single data point shifts the loss landscape slightly. How strongly an algorithm's path reacts to this shift dictates its algorithmic stability and generalization. Heavy-tailed paths are mathematically "sparser" (lower Hausdorff dimension), allowing them to step right over these micro-shifts and avoid sharp traps.
+                </div>
+                <div class="math-box">
+                    <strong>Algorithmic Stability and Hausdorff Dimension:</strong> Consider the framework for generalization and algorithmic stability: adding or removing a single data point from the training set perturbs the full-batch objective function $L(\theta)$ by a small margin. Consequently, the stochastic gradients evaluated during optimization shift by a proportional margin, altering both their mean and law (Şimşekli, Sener, Deligiannidis, & Erdogdu, 2021, "Hausdorff Dimension, Heavy Tails, and Generalization in Neural Networks"). To understand how this functional shift affects the macroscopic trajectory of the parameters, we analyze the topological footprint of the path measured by its Hausdorff dimension. 
+                    <br><br>
+                    The parameter trajectory is modeled as a Feller process $W_t$ taking values in $\mathbb{R}^d$, governed by the SDE:
+                    $$ \mathrm{d}W_t = -\nabla f(W_t)\mathrm{d}t + \Sigma_1(W_t)\mathrm{d}B_t + \Sigma_2(W_t)\mathrm{d}L_t^{\alpha(W_t)} $$
+                    where $B_t$ is standard Brownian motion and $L_t^{\alpha(W_t)}$ is an $\alpha$-stable Lévy motion. We analyze the geometric complexity of the continuous path $\mathcal{W} = \{ W_t : t \in [0, T] \}$. The Hausdorff dimension $\dim_H(\mathcal{W})$ measures the geometric thickness or space-filling capacity of the path. It is bounded by the upper Blumenthal-Getoor index $\beta$ of the process. For an $\alpha$-stable Lévy process, $\dim_H(\mathcal{W}) \leqslant \alpha$ almost surely.
+                    <br><br>
+                    Historically, the Hausdorff dimension of the sample paths of Feller processes was established by René Schilling (Schilling, 1998, "Growth and Hölder conditions for the sample paths of Feller processes", Theorem 4), linking the analytic symbol of the differential generator to the path's geometry. Building upon this, Şimşekli, Sagun, & Gürbüzbalaban (2019, "A tail-index analysis of stochastic gradient noise") demonstrated that the infinite-variance gradient noise found in deep learning shifts the continuous limit of SGD from standard Brownian motion (Hausdorff dimension $2$) to an $\alpha$-stable Lévy process (Hausdorff dimension $\alpha < 2$). 
+                    <br><br>
+                    A trajectory with a lower Hausdorff dimension is fundamentally sparser and covers space less densely. When the underlying gradient field shifts slightly due to a data perturbation, a space-filling Brownian path will likely fall into and get trapped by the shifted sharp minima. In contrast, a low-dimensional Lévy path exhibits long-range jumps that effortlessly leap over these narrow perturbed traps, settling only in wide, flat valleys that are robust to data shifts (Şimşekli, Sener, Deligiannidis, & Erdogdu, 2021). This provides a geometric link between heavy-tailed noise and model generalization.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-divide text-amber-500 mr-2"></i> Heavy-Tailed Fractional Limits</h3>
+                <div class="math-box">
+                    <strong>Fractional Scaling:</strong> When the stochastic gradient is regularly varying with index $\alpha \in (1, 2)$ (infinite variance), the scaling must be adjusted. For a constant step size $\eta \to 0$, the scaled trajectory converges in the Skorokhod $J_1$ topology (Blanchet, Mijatović, & Yang, 2024, "Limit theorems for SGD", Theorem 3.1):
+                    $$ \eta^{\frac{1}{\alpha}-1}b_1(\eta^{-1})(\theta_{\lfloor \cdot/\eta \rfloor} - \bar{\theta}(\cdot)) \Rightarrow Z(\cdot) $$
+                    where $b_1$ is a slowly varying function. 
+                    <hr class="my-3 border-slate-300">
+                    <strong>The Jump Limit:</strong> The limiting stochastic process $Z(\cdot)$ is governed by a time-inhomogeneous SDE:
+                    $$ \mathrm{d}Z_t = -\nabla^2 l(\bar{\theta}(t))Z_t \mathrm{d}t + \mathrm{d}L_t $$
+                    Crucially, $L_t$ is an additive process defined by a heavy-tailed jump measure $\nu_t(\mathrm{d}x)$ rather than a Brownian motion, formalizing the emergence of explosive optimization trajectories.
+                </div>
+                
+                <div class="controls-bar">
+                    <div class="input-group">
+                        <label for="scaling-alpha">Tail Index (α): <span id="scaling-alpha-val">1.2</span></label>
+                        <input type="range" id="scaling-alpha" min="1.0" max="2.0" step="0.1" value="1.2">
+                    </div>
+                    <div class="input-group">
+                        <label for="scaling-steps">Discretization Steps: <span id="scaling-steps-val">1000</span></label>
+                        <input type="range" id="scaling-steps" min="100" max="5000" step="100" value="1000">
+                    </div>
+                    <div class="input-group">
+                        <label for="scaling-time">Time Horizon: <span id="scaling-time-val">10.0</span></label>
+                        <input type="range" id="scaling-time" min="1.0" max="50.0" step="1.0" value="10.0">
+                    </div>
+                    <button class="btn-action ml-auto" onclick="drawScalingLimitsSimulation()">Recalculate 2D Path Limit</button>
+                </div>
+                <div id="vis-scaling-limits" class="vis-container h-[400px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">The Gaussian diffusion path is dense and continuous (navy blue line). The truncated Lévy process exhibits a sparse, discrete geometry (dark red dots) with spatial gaps.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-anchor-circle-check text-amber-500 mr-2"></i> Stationary Distributions & Invariant Measures</h3>
+                <div class="math-box">
+                    <strong>Decaying Step-Size Equilibrium:</strong> For a decaying step size $\eta_n = c n^{-\rho}$ with $\rho \in (0, 1)$, the scaled parameter error weakly converges to $Z_\infty$, which is the stationary distribution of the Lévy-driven OU process:
+                    $$ \mathrm{d}Z_t = -\nabla^2 l(\theta^*)Z_t \mathrm{d}t + \mathrm{d}L_t $$
+                    This yields an explicit analytical solution integrating the heavy-tailed noise against the loss landscape's curvature:
+                    $$ Z_\infty = \int_0^\infty \exp(-\nabla^2 l(\theta^*)t) \mathrm{d}L_t $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>Invariant Measure Conditions:</strong> For generalized Ornstein-Uhlenbeck processes, stability and the existence of heavy-tailed invariant measures depend on the jump measure $\nu$ of the driving Lévy process. An invariant probability measure exists if and only if the logarithmic moment condition is satisfied (Behme & Lindner, 2015, "On exponential functionals of Lévy processes"):
+                    $$ \int_{\|x\| > 1} \log \|x\| \nu(\mathrm{d}x) < \infty. $$
+                </div>
+            </div>
+        </section>
+        
+        <section id="references" class="mb-24 scroll-mt-24">
+            <div class="mb-8">
+                <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif border-b border-slate-200 pb-4">References</h2>
+            </div>
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <ul class="list-none space-y-4 text-sm text-slate-600">
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Behme, A., & Lindner, A. (2015).</b> On exponential functionals of Lévy processes. <i>Journal of Theoretical Probability</i>, 28(2), 681-720.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Blanchet, J., Mijatović, A., & Yang, W. (2024).</b> Limit theorems for stochastic gradient descent with infinite variance. <i>The Annals of Applied Probability</i> (To appear).</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Brešar, M., & Mijatović, A. (2024).</b> Subexponential lower bounds for $f$-ergodic Markov processes. <i>Probability Theory and Related Fields</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Brešar, M., & Mijatović, A. (2026).</b> Diffeomorphic Markov Chain Monte Carlo: fast mixing for heavy-tailed distributions. <i>arXiv preprint</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Cheng, X., Yin, D., Bartlett, P. L., & Jordan, M. I. (2020).</b> Stochastic Gradient and Langevin Processes. <i>Proceedings of Machine Learning Research</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Dereich, S., & Jentzen, A. (2024).</b> Convergence rates for the Adam optimizer. <i>arXiv preprint arXiv:2407.21078</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Douc, R., Fort, G., & Guillin, A. (2009).</b> Subgeometric rates of convergence of f-ergodic strong Markov processes. <i>Stochastic Processes and their Applications</i>, 119(3), 897-923.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Douc, R., Moulines, E., Priouret, P., & Soulier, P. (2018).</b> <i>Markov Chains</i>. Springer, Cham.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Duchi, J., Hazan, E., & Singer, Y. (2011).</b> Adaptive Subgradient Methods for Online Learning and Stochastic Optimization. <i>Journal of Machine Learning Research</i>, 12, 2121-2159.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Hochreiter, S., & Schmidhuber, J. (1997).</b> Flat minima. <i>Neural Computation</i>, 9(1), 1-42.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Kantorovich, L. V. (1948).</b> Functional analysis and applied mathematics. <i>Uspekhi Matematicheskikh Nauk</i>, 3(6), 89-185.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Kingma, D. P., & Ba, J. (2014).</b> Adam: A Method for Stochastic Optimization. <i>arXiv preprint arXiv:1412.6980</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Kushner, H. J., & Clark, D. S. (1978).</b> <i>Stochastic Approximation Methods for Constrained and Unconstrained Systems</i>. Springer-Verlag.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Mattingly, J. C., Stuart, A. M., & Higham, D. J. (2002).</b> Ergodicity for SDEs and approximations: locally Lipschitz vector fields and degenerate noise. <i>Stochastic Processes and their Applications</i>, 101(2), 185-232.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Meyn, S. P., & Tweedie, R. L. (1993).</b> <i>Markov Chains and Stochastic Stability</i>. Springer, London.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Molina Palma, M. A., & González Cázares, J. I. (2026).</b> Robust Stochastic Gradient Descent via Median-of-Means Estimators. <i>Ongoing work, IIMAS-UNAM</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Nesterov, Y. (2004).</b> <i>Introductory Lectures on Convex Optimization: A Basic Course</i>. Springer.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Nocedal, J., & Wright, S. J. (2006).</b> <i>Numerical Optimization</i>. Springer.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Polyak, B. T. (1963).</b> Gradient methods for the minimisation of functionals. <i>USSR Computational Mathematics and Mathematical Physics</i>, 3(4), 864-878.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Reddi, S. J., Kale, S., & Kumar, S. (2018).</b> On the Convergence of Adam and Beyond. <i>International Conference on Learning Representations (ICLR)</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Robbins, H., & Monro, S. (1951).</b> A stochastic approximation method. <i>The Annals of Mathematical Statistics</i>, 22(3), 400-407.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Robbins, H., & Siegmund, D. (1971).</b> A convergence theorem for non negative almost supermartingales and some applications. <i>Optimizing methods in statistics</i>, 233-257.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Roberts, G. O., & Tweedie, R. L. (1996).</b> Exponential convergence of Langevin distributions and their discrete approximations. <i>Bernoulli</i>, 2(4), 341-363.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Sacks, J. (1958).</b> Asymptotic distribution of stochastic approximation procedures. <i>The Annals of Mathematical Statistics</i>, 29(2), 373-405.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Schilling, R. L. (1998).</b> Growth and Hölder conditions for the sample paths of Feller processes. <i>Probability Theory and Related Fields</i>, 112(4), 565-611.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Şimşekli, U. (2021).</b> The Heavy-Tail Phenomenon in SGD. <i>International Conference on Machine Learning (ICML)</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Şimşekli, U., Sagun, L., & Gürbüzbalaban, M. (2019).</b> A tail-index analysis of stochastic gradient noise in deep neural networks. <i>International Conference on Machine Learning (ICML)</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Şimşekli, U., Sener, O., Deligiannidis, G., & Erdogdu, M. A. (2021).</b> Hausdorff Dimension, Heavy Tails, and Generalization in Neural Networks. <i>Advances in Neural Information Processing Systems</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Tuominen, P., & Tweedie, R. L. (1994).</b> Subgeometric rates of convergence of f-ergodic Markov chains. <i>Advances in Applied Probability</i>, 26(3), 775-798.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Wang, X., Oh, S., & Rhee, C.-H. (2021).</b> Eliminating sharp minima from SGD with truncated heavy-tailed noise. <i>arXiv preprint arXiv:2102.04297</i>.</span></li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Action Button for Desktop Sidebar Toggle -->
+    <button id="floating-menu-btn" class="hidden md:flex fixed bottom-6 left-6 z-50 bg-indigo-600 text-white w-14 h-14 rounded-full shadow-lg items-center justify-center hover:bg-indigo-700 hover:scale-105 transition-all focus:outline-none">
+        <i class="fa-solid fa-bars text-xl"></i>
+    </button>
+
+    <script>
+        function randn() {
+            let u = 0, v = 0;
+            while(u === 0) u = Math.random();
+            while(v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        // Mathematical Functions for Simulation
+        function himmelblau(x, y) {
+            return Math.pow(x*x + y - 11, 2) + Math.pow(x + y*y - 7, 2);
+        }
+
+        function gradHimmelblau(x, y) {
+            return [
+                4*x*(x*x + y - 11) + 2*(x + y*y - 7),
+                2*(x*x + y - 11) + 4*y*(x + y*y - 7)
+            ];
+        }
+        
+        function doubleWell(x) {
+            return Math.pow(x, 4) - 4 * Math.pow(x, 2) + 0.5 * x;
+        }
+        
+        function gradDoubleWell(x) {
+            return 4 * Math.pow(x, 3) - 8 * x + 0.5;
+        }
+
+        function fourMode(x) {
+            return -3 * Math.exp(-5 * Math.pow(x - 2, 2)) 
+                   -3 * Math.exp(-5 * Math.pow(x + 2, 2)) 
+                   -2.5 * Math.exp(-0.5 * Math.pow(x - 6, 2)) 
+                   -2.5 * Math.exp(-0.5 * Math.pow(x + 6, 2)) 
+                   + 0.01 * x * x;
+        }
+
+        function gradFourMode(x) {
+            return 30 * (x - 2) * Math.exp(-5 * Math.pow(x - 2, 2)) 
+                   + 30 * (x + 2) * Math.exp(-5 * Math.pow(x + 2, 2)) 
+                   + 2.5 * (x - 6) * Math.exp(-0.5 * Math.pow(x - 6, 2)) 
+                   + 2.5 * (x + 6) * Math.exp(-0.5 * Math.pow(x + 6, 2)) 
+                   + 0.02 * x;
+        }
+
+        function gaussianKDE(bandwidth, data, grid) {
+            const n = data.length;
+            if (n === 0) return grid.map(() => 0);
+            const c = 1.0 / (n * bandwidth * Math.sqrt(2 * Math.PI));
+            return grid.map(x => {
+                let sum = 0;
+                for (let i = 0; i < n; i++) {
+                    let u = (x - data[i]) / bandwidth;
+                    sum += Math.exp(-0.5 * u * u);
+                }
+                return sum * c;
+            });
+        }
+
+        function alphaStable(alpha) {
+            if (alpha === 2.0) {
+                return randn() * Math.sqrt(2); 
+            }
+            let V = (Math.random() - 0.5) * Math.PI;
+            let W = -Math.log(Math.random());
+            let part1 = Math.sin(alpha * V) / Math.pow(Math.cos(V), 1/alpha);
+            let part2 = Math.pow(Math.cos(V - alpha * V) / W, (1 - alpha) / alpha);
+            return part1 * part2;
+        }
+
+        function drawGeometries() {
+            let x_range = [], y_range = [], z_convex = [], z_pl = [];
+            for(let i = -2; i <= 2; i+=0.1) {
+                x_range.push(i);
+                y_range.push(i);
+            }
+            for(let j = 0; j < y_range.length; j++) {
+                let row_c = [], row_pl = [];
+                for(let i = 0; i < x_range.length; i++) {
+                    row_c.push(x_range[i]*x_range[i] + y_range[j]*y_range[j]);
+                    row_pl.push(Math.pow(y_range[j] - x_range[i]*x_range[i], 2));
+                }
+                z_convex.push(row_c);
+                z_pl.push(row_pl);
+            }
+            Plotly.newPlot('vis-geom-convex', [{ type: 'surface', x: x_range, y: y_range, z: z_convex, colorscale: 'Viridis', showscale: false }], {
+                title: 'f(x,y) = x² + y²', margin: {l:0, r:0, b:10, t:30}
+            });
+            Plotly.newPlot('vis-geom-pl', [{ type: 'surface', x: x_range, y: y_range, z: z_pl, colorscale: 'Plasma', showscale: false }], {
+                title: 'f(x,y) = (y-x²)²', margin: {l:0, r:0, b:10, t:30}
+            });
+        }
+
+        function drawGDFlowSimulation() {
+            const lr = parseFloat(document.getElementById('gd-lr').value);
+            const steps = parseInt(document.getElementById('gd-steps').value);
+            const startX = parseFloat(document.getElementById('gd-start-x').value);
+            const startY = parseFloat(document.getElementById('gd-start-y').value);
+
+            let x_range = [], y_range = [], z_surface = [];
+            for(let i = -5; i <= 5; i+=0.2) {
+                x_range.push(i);
+                y_range.push(i);
+            }
+            for(let j = 0; j < y_range.length; j++) {
+                let z_row = [];
+                for(let i = 0; i < x_range.length; i++) {
+                    z_row.push(himmelblau(x_range[i], y_range[j]));
+                }
+                z_surface.push(z_row);
+            }
+
+            let gd_x = [startX], gd_y = [startY], gd_z = [himmelblau(startX, startY)];
+            let currX = startX, currY = startY;
+            for(let i=0; i<steps; i++) {
+                let [gx, gy] = gradHimmelblau(currX, currY);
+                currX -= lr * gx;
+                currY -= lr * gy;
+                gd_x.push(currX);
+                gd_y.push(currY);
+                gd_z.push(himmelblau(currX, currY));
+            }
+
+            let flow_x = [startX], flow_y = [startY], flow_z = [himmelblau(startX, startY)];
+            let fX = startX, fY = startY;
+            const dt = 0.001;
+            const flowSteps = Math.floor((lr * steps) / dt);
+            for(let i=0; i<flowSteps; i++) {
+                let [gx, gy] = gradHimmelblau(fX, fY);
+                fX -= dt * gx;
+                fY -= dt * gy;
+                if(i % 10 === 0) {
+                    flow_x.push(fX); flow_y.push(fY); flow_z.push(himmelblau(fX, fY));
+                }
+            }
+            
+            Plotly.newPlot('vis-gd-3d', [
+                { type: 'surface', x: x_range, y: y_range, z: z_surface, colorscale: 'Viridis', opacity: 0.8, showscale: false },
+                { type: 'scatter3d', mode: 'lines+markers', x: gd_x, y: gd_y, z: gd_z, marker: {size: 4, color: 'red'}, line: {color: 'red', width: 2}, name: 'GD' },
+                { type: 'scatter3d', mode: 'lines', x: flow_x, y: flow_y, z: flow_z, line: {color: 'white', width: 4}, name: 'GF' }
+            ], { title: '3D Landscape', margin: {l:0, r:0, b:10, t:30}, scene: { zaxis: { range: [0, 400] } }, legend: { orientation: 'h', y: -0.1 }});
+
+            Plotly.newPlot('vis-gd-2d', [
+                { type: 'contour', x: x_range, y: y_range, z: z_surface, colorscale: 'Viridis', showscale: false },
+                { type: 'scatter', mode: 'lines+markers', x: gd_x, y: gd_y, marker: {size: 6, color: 'red'}, line: {color: 'red'}, name: 'GD' },
+                { type: 'scatter', mode: 'lines', x: flow_x, y: flow_y, line: {color: 'white', width: 2}, name: 'GF' }
+            ], { title: '2D Projection', margin: {l:30, r:30, b:10, t:30}, xaxis: {range: [-5, 5]}, yaxis: {range: [-5, 5]}, legend: { orientation: 'h', y: -0.1 }});
+        }
+
+        function drawSGDSimulation() {
+            const noise = parseFloat(document.getElementById('sgd-noise').value);
+            const lr = parseFloat(document.getElementById('sgd-lr').value);
+            const startX = parseFloat(document.getElementById('sgd-start-x').value);
+
+            let x_vals = [], y_vals = [];
+            for(let i = -20.0; i <= 20.0; i+=0.2) {
+                x_vals.push(i);
+                y_vals.push(fourMode(i));
+            }
+
+            let path_x = [startX], path_y = [fourMode(startX)];
+            let currX = startX;
+            for(let i=0; i<200; i++) {
+                let g = gradFourMode(currX) + noise * randn();
+                currX -= lr * g;
+                currX = Math.max(-20.0, Math.min(20.0, currX));
+                path_x.push(currX);
+                path_y.push(fourMode(currX));
+            }
+
+            Plotly.newPlot('vis-sgd-trajectory', [
+                { type: 'scatter', mode: 'lines', x: x_vals, y: y_vals, line: {color: '#475569'}, name: 'Landscape' },
+                { type: 'scatter', mode: 'lines+markers', x: path_x, y: path_y, marker: {size: 8, color: '#ef4444'}, line: {color: '#fca5a5'}, name: 'SGD' }
+            ], { title: '1D SGD Escaping Local Minima', margin: {t:40, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.15 } });
+        }
+
+        function drawOptimizers() {
+            const c1 = parseFloat(document.getElementById('opt-c1').value);
+            const c2 = parseFloat(document.getElementById('opt-c2').value);
+            const lr = parseFloat(document.getElementById('opt-lr').value);
+            const startX = parseFloat(document.getElementById('opt-start-x').value);
+            const startY = parseFloat(document.getElementById('opt-start-y').value);
+            const steps = parseInt(document.getElementById('opt-steps').value);
+
+            let x_range = [], y_range = [], z_val = [];
+            for(let i = -15; i <= 15; i+=0.5) {
+                x_range.push(i); y_range.push(i);
+            }
+            for(let j = 0; j < y_range.length; j++) {
+                let row = [];
+                for(let i = 0; i < x_range.length; i++) row.push(0.02*(x_range[i]*x_range[i] + y_range[j]*y_range[j]) - c1*Math.exp(-0.2*Math.pow(x_range[i]-3,2) - 0.8*Math.pow(y_range[j]-3,2)) - c2*Math.exp(-0.8*Math.pow(x_range[i]+3,2) - 0.2*Math.pow(y_range[j]+3,2)));
+                z_val.push(row);
+            }
+
+            const getGrad = (x, y) => {
+                let E1 = Math.exp(-0.2*Math.pow(x-3,2) - 0.8*Math.pow(y-3,2));
+                let E2 = Math.exp(-0.8*Math.pow(x+3,2) - 0.2*Math.pow(y+3,2));
+                let dx = 0.04*x - c1*E1*(-0.4*(x-3)) - c2*E2*(-1.6*(x+3));
+                let dy = 0.04*y - c1*E1*(-1.6*(y-3)) - c2*E2*(-0.4*(y+3));
+                return [dx, dy];
+            };
+
+            let sx = [startX], sy = [startY], cx=startX, cy=startY;
+            for(let i=0; i<steps; i++) { 
+                let [gx, gy] = getGrad(cx, cy);
+                cx -= lr * gx; cy -= lr * gy; 
+                sx.push(cx); sy.push(cy); 
+            }
+
+            let mx = [startX], my = [startY], cmx=startX, cmy=startY, vx=0, vy=0;
+            for(let i=0; i<steps; i++) { 
+                let [gx, gy] = getGrad(cmx, cmy);
+                vx = 0.9*vx + gx; vy = 0.9*vy + gy;
+                cmx -= lr * vx; cmy -= lr * vy; 
+                mx.push(cmx); my.push(cmy); 
+            }
+
+            let agx = [startX], agy = [startY], cagx=startX, cagy=startY, rx=0, ry=0;
+            for(let i=0; i<steps; i++) { 
+                let [gx, gy] = getGrad(cagx, cagy);
+                rx += gx*gx; ry += gy*gy;
+                cagx -= lr / Math.sqrt(rx + 1e-8) * gx; cagy -= lr / Math.sqrt(ry + 1e-8) * gy; 
+                agx.push(cagx); agy.push(cagy); 
+            }
+
+            let amx = [startX], amy = [startY], camx=startX, camy=startY, m1x=0, m1y=0, m2x=0, m2y=0;
+            for(let i=1; i<=steps; i++) { 
+                let [gx, gy] = getGrad(camx, camy);
+                m1x = 0.9*m1x + 0.1*gx; m1y = 0.9*m1y + 0.1*gy;
+                m2x = 0.999*m2x + 0.001*gx*gx; m2y = 0.999*m2y + 0.001*gy*gy;
+                let mhx = m1x/(1-Math.pow(0.9, i)), mhy = m1y/(1-Math.pow(0.9, i));
+                let vhx = m2x/(1-Math.pow(0.999, i)), vhy = m2y/(1-Math.pow(0.999, i));
+                camx -= lr / (Math.sqrt(vhx) + 1e-8) * mhx; camy -= lr / (Math.sqrt(vhy) + 1e-8) * mhy; 
+                amx.push(camx); amy.push(camy); 
+            }
+
+            Plotly.newPlot('vis-optimizers', [
+                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Greys', showscale: false },
+                { type: 'scatter', mode: 'lines+markers', x: sx, y: sy, name: 'GD', line: {color: '#3b82f6'}, marker: {size:3} },
+                { type: 'scatter', mode: 'lines+markers', x: mx, y: my, name: 'Momentum', line: {color: '#f97316'}, marker: {size:3} },
+                { type: 'scatter', mode: 'lines+markers', x: agx, y: agy, name: 'AdaGrad', line: {color: '#10b981'}, marker: {size:3} },
+                { type: 'scatter', mode: 'lines+markers', x: amx, y: amy, name: 'Adam', line: {color: '#ef4444'}, marker: {size:3} }
+            ], { title: 'Deterministic Optimizer Trajectories', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-15, 15]}, yaxis: {range: [-15, 15]} });
+        }
+
+        function drawStochasticOptimizers() {
+            const c1 = parseFloat(document.getElementById('opt-c1').value);
+            const c2 = parseFloat(document.getElementById('opt-c2').value);
+            const lr = parseFloat(document.getElementById('opt-lr').value);
+            const startX = parseFloat(document.getElementById('opt-start-x').value);
+            const startY = parseFloat(document.getElementById('opt-start-y').value);
+            const steps = parseInt(document.getElementById('opt-steps').value);
+            const noise = parseFloat(document.getElementById('opt-noise').value);
+
+            let x_range = [], y_range = [], z_val = [];
+            for(let i = -15; i <= 15; i+=0.5) { x_range.push(i); y_range.push(i); }
+            for(let j = 0; j < y_range.length; j++) {
+                let row = [];
+                for(let i = 0; i < x_range.length; i++) row.push(0.02*(x_range[i]*x_range[i] + y_range[j]*y_range[j]) - c1*Math.exp(-0.2*Math.pow(x_range[i]-3,2) - 0.8*Math.pow(y_range[j]-3,2)) - c2*Math.exp(-0.8*Math.pow(x_range[i]+3,2) - 0.2*Math.pow(y_range[j]+3,2)));
+                z_val.push(row);
+            }
+
+            const getGrad = (x, y) => {
+                let E1 = Math.exp(-0.2*Math.pow(x-3,2) - 0.8*Math.pow(y-3,2));
+                let E2 = Math.exp(-0.8*Math.pow(x+3,2) - 0.2*Math.pow(y+3,2));
+                let dx = 0.04*x - c1*E1*(-0.4*(x-3)) - c2*E2*(-1.6*(x+3));
+                let dy = 0.04*y - c1*E1*(-1.6*(y-3)) - c2*E2*(-0.4*(y+3));
+                return [dx, dy];
+            };
+
+            let sx = [startX], sy = [startY], cx=startX, cy=startY;
+            for(let i=0; i<steps; i++) { 
+                let [gx, gy] = getGrad(cx, cy);
+                cx -= lr * (gx + noise*randn()); cy -= lr * (gy + noise*randn()); 
+                sx.push(cx); sy.push(cy); 
+            }
+
+            let mx = [startX], my = [startY], cmx=startX, cmy=startY, vx=0, vy=0;
+            for(let i=0; i<steps; i++) { 
+                let [gx, gy] = getGrad(cmx, cmy);
+                vx = 0.9*vx + (gx + noise*randn()); vy = 0.9*vy + (gy + noise*randn());
+                cmx -= lr * vx; cmy -= lr * vy; 
+                mx.push(cmx); my.push(cmy); 
+            }
+
+            let agx = [startX], agy = [startY], cagx=startX, cagy=startY, rx=0, ry=0;
+            for(let i=0; i<steps; i++) { 
+                let [gx, gy] = getGrad(cagx, cagy);
+                let gnx = gx + noise*randn(); let gny = gy + noise*randn();
+                rx += gnx*gnx; ry += gny*gny;
+                cagx -= lr / Math.sqrt(rx + 1e-8) * gnx; cagy -= lr / Math.sqrt(ry + 1e-8) * gny; 
+                agx.push(cagx); agy.push(cagy); 
+            }
+
+            let amx = [startX], amy = [startY], camx=startX, camy=startY, m1x=0, m1y=0, m2x=0, m2y=0;
+            for(let i=1; i<=steps; i++) { 
+                let [gx, gy] = getGrad(camx, camy);
+                let gnx = gx + noise*randn(); let gny = gy + noise*randn();
+                m1x = 0.9*m1x + 0.1*gnx; m1y = 0.9*m1y + 0.1*gny;
+                m2x = 0.999*m2x + 0.001*gnx*gnx; m2y = 0.999*m2y + 0.001*gny*gny;
+                let mhx = m1x/(1-Math.pow(0.9, i)), mhy = m1y/(1-Math.pow(0.9, i));
+                let vhx = m2x/(1-Math.pow(0.999, i)), vhy = m2y/(1-Math.pow(0.999, i));
+                camx -= lr / (Math.sqrt(vhx) + 1e-8) * mhx; camy -= lr / (Math.sqrt(vhy) + 1e-8) * mhy; 
+                amx.push(camx); amy.push(camy); 
+            }
+
+            Plotly.newPlot('vis-stochastic-optimizers', [
+                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Greys', showscale: false },
+                { type: 'scatter', mode: 'lines+markers', x: sx, y: sy, name: 'SGD', line: {color: '#3b82f6'}, marker: {size:3} },
+                { type: 'scatter', mode: 'lines+markers', x: mx, y: my, name: 'SGD + Momentum', line: {color: '#f97316'}, marker: {size:3} },
+                { type: 'scatter', mode: 'lines+markers', x: agx, y: agy, name: 'AdaGrad', line: {color: '#10b981'}, marker: {size:3} },
+                { type: 'scatter', mode: 'lines+markers', x: amx, y: amy, name: 'Adam', line: {color: '#ef4444'}, marker: {size:3} }
+            ], { title: 'Stochastic Optimizer Trajectories', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-15, 15]}, yaxis: {range: [-15, 15]} });
+        }
+
+        function drawHamiltonian() {
+            const c = parseFloat(document.getElementById('ham-c').value);
+            const startX = parseFloat(document.getElementById('ham-start-x').value);
+            const startY = parseFloat(document.getElementById('ham-start-y').value);
+            const steps = parseInt(document.getElementById('ham-steps').value);
+            const dt = parseFloat(document.getElementById('ham-dt').value);
+            const T = parseFloat(document.getElementById('ham-temp').value);
+            const gamma = parseFloat(document.getElementById('ham-gamma').value);
+
+            let x_range = [], y_range = [], z_val = [];
+            for(let i = -5; i <= 5; i+=0.2) { x_range.push(i); }
+            for(let i = -2; i <= 15; i+=0.2) { y_range.push(i); }
+            for(let j = 0; j < y_range.length; j++) {
+                let row = [];
+                for(let i = 0; i < x_range.length; i++) row.push(Math.pow(1 - x_range[i], 2) + c * Math.pow(y_range[j] - x_range[i]*x_range[i], 2));
+                z_val.push(row);
+            }
+
+            let ox = [startX], oy = [startY], cx = startX, cy = startY;
+            for(let i=0; i<steps; i++) {
+                let dx = -2*(1-cx) - 4*c*cx*(cy-cx*cx), dy = 2*c*(cy-cx*cx);
+                cx += -dx * dt + Math.sqrt(2 * T * dt) * randn(); 
+                cy += -dy * dt + Math.sqrt(2 * T * dt) * randn();
+                ox.push(cx); oy.push(cy);
+            }
+
+            let ux = [startX], uy = [startY], cux = startX, cuy = startY, px = 0, py = 0;
+            for(let i=0; i<steps; i++) {
+                let dx = -2*(1-cux) - 4*c*cux*(cuy-cux*cux), dy = 2*c*(cuy-cux*cux);
+                px += -dx*dt - gamma*px*dt + Math.sqrt(2 * gamma * T * dt) * randn(); 
+                py += -dy*dt - gamma*py*dt + Math.sqrt(2 * gamma * T * dt) * randn();
+                cux += px*dt; cuy += py*dt;
+                ux.push(cux); uy.push(cuy);
+            }
+
+            Plotly.newPlot('vis-hamiltonian', [
+                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Blues', showscale: false },
+                { type: 'scatter', mode: 'lines', x: ox, y: oy, name: 'OLD', line: {color: '#8b0000', width: 2} },
+                { type: 'scatter', mode: 'lines', x: ux, y: uy, name: 'ULD', line: {color: '#f97316', width: 2} }
+            ], { title: 'Overdamped vs Underdamped Dynamics', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-5, 5]}, yaxis: {range: [-2, 12]} });
+        }
+
+        function drawLangevinSimulation() {
+            const alpha = parseFloat(document.getElementById('levy-alpha-1').value);
+            const steps = parseInt(document.getElementById('levy-steps-1').value);
+
+            let t_vals = [0], b_path = [0], l_path = [0];
+            let b_x = 0, l_x = 0;
+            const dt = 0.05;
+
+            for(let i=1; i<=steps; i++) {
+                t_vals.push(i * dt);
+                
+                let db = alphaStable(2.0) * Math.sqrt(dt);
+                b_x += -gradDoubleWell(b_x) * dt + 0.5 * db;
+                b_x = Math.max(-3, Math.min(3, b_x)); 
+                b_path.push(b_x);
+
+                let dl = alphaStable(alpha) * Math.pow(dt, 1/alpha);
+                dl = Math.max(-10, Math.min(10, dl));
+                let gradL = Math.max(-20, Math.min(20, gradDoubleWell(l_x)));
+                l_x += -gradL * dt + 0.5 * dl;
+                l_x = Math.max(-3, Math.min(3, l_x)); 
+                l_path.push(l_x);
+            }
+
+            Plotly.newPlot('vis-langevin-jumps-1', [
+                { type: 'scatter', mode: 'lines', x: t_vals, y: b_path, name: 'OLD (α=2)', line: {color: '#3b82f6', width: 1.5} },
+                { type: 'scatter', mode: 'lines', x: t_vals, y: l_path, name: `L-OLD (α=${alpha})`, line: {color: '#f59e0b', width: 1.5} }
+            ], { title: 'Brownian vs. Lévy Paths (Double Well)', margin: {t:40, b:10, l:30, r:30}, yaxis: { range: [-3, 3] }, legend: { orientation: 'h', y: -0.15 } });
+        }
+
+        function drawLangevinSimulation2() {
+            const alpha = parseFloat(document.getElementById('levy-alpha-2').value);
+            const steps = parseInt(document.getElementById('levy-steps-2').value);
+
+            let t_vals = [0], b_path = [0], l_path = [0];
+            let b_x = 0, l_x = 0;
+            const dt = 0.05;
+
+            for(let i=1; i<=steps; i++) {
+                t_vals.push(i * dt);
+                
+                let db = alphaStable(2.0) * Math.sqrt(dt);
+                b_x += -gradFourMode(b_x) * dt + 0.5 * db;
+                b_x = Math.max(-10, Math.min(10, b_x));
+                b_path.push(b_x);
+
+                let dl = alphaStable(alpha) * Math.pow(dt, 1/alpha);
+                dl = Math.max(-10, Math.min(10, dl));
+                let gradL = Math.max(-20, Math.min(20, gradFourMode(l_x)));
+                l_x += -gradL * dt + 0.5 * dl;
+                l_x = Math.max(-10, Math.min(10, l_x));
+                l_path.push(l_x);
+            }
+
+            Plotly.newPlot('vis-langevin-jumps-2', [
+                { type: 'scatter', mode: 'lines', x: t_vals, y: b_path, name: 'OLD (α=2)', line: {color: '#3b82f6', width: 1.5} },
+                { type: 'scatter', mode: 'lines', x: t_vals, y: l_path, name: `L-OLD (α=${alpha})`, line: {color: '#f59e0b', width: 1.5} }
+            ], { title: 'Brownian vs. Lévy Paths (Four Modes)', margin: {t:40, b:10, l:30, r:30}, yaxis: { range: [-10, 10] }, legend: { orientation: 'h', y: -0.15 } });
+        }
+
+        function drawDiffeo() {
+            const c = parseFloat(document.getElementById('diffeo-c').value);
+            
+            let latent_x = [], latent_y = [];
+            let target_x = [], target_y = [];
+
+            for(let i = -2; i <= 2; i += 0.5) {
+                for(let j = -2; j <= 2; j += 0.05) {
+                    latent_x.push(i); latent_y.push(j);
+                    let r2 = i*i + j*j;
+                    let mult = Math.exp(c * r2);
+                    target_x.push(i * mult); target_y.push(j * mult);
+                }
+                latent_x.push(null); latent_y.push(null);
+                target_x.push(null); target_y.push(null);
+                
+                for(let j = -2; j <= 2; j += 0.05) {
+                    latent_x.push(j); latent_y.push(i);
+                    let r2 = j*j + i*i;
+                    let mult = Math.exp(c * r2);
+                    target_x.push(j * mult); target_y.push(i * mult);
+                }
+                latent_x.push(null); latent_y.push(null);
+                target_x.push(null); target_y.push(null);
+            }
+            
+            let latent_circ_x = [], latent_circ_y = [];
+            let target_circ_x = [], target_circ_y = [];
+            for(let r = 0.5; r <= 2.0; r += 0.5) {
+                for(let theta = 0; theta <= 2*Math.PI + 0.1; theta += 0.05) {
+                    let lx = r * Math.cos(theta);
+                    let ly = r * Math.sin(theta);
+                    latent_circ_x.push(lx); latent_circ_y.push(ly);
+                    let mult = Math.exp(c * r*r);
+                    target_circ_x.push(lx * mult); target_circ_y.push(ly * mult);
+                }
+                latent_circ_x.push(null); latent_circ_y.push(null);
+                target_circ_x.push(null); target_circ_y.push(null);
+            }
+
+            Plotly.newPlot('vis-diffeo', [
+                { x: latent_x, y: latent_y, mode: 'lines', line: {color: '#cbd5e1', width: 1}, xaxis: 'x', yaxis: 'y', hoverinfo: 'none' },
+                { x: latent_circ_x, y: latent_circ_y, mode: 'lines', line: {color: '#3b82f6', width: 2}, xaxis: 'x', yaxis: 'y', name: 'Latent' },
+                { x: target_x, y: target_y, mode: 'lines', line: {color: '#fecaca', width: 1}, xaxis: 'x2', yaxis: 'y2', hoverinfo: 'none' },
+                { x: target_circ_x, y: target_circ_y, mode: 'lines', line: {color: '#ef4444', width: 2}, xaxis: 'x2', yaxis: 'y2', name: 'Target' }
+            ], {
+                title: 'Diffeomorphism h(η): Latent Space → Target Space', showlegend: false, grid: {rows: 1, columns: 2, pattern: 'independent'},
+                xaxis: {title: 'η₁', range: [-3, 3], zeroline: false}, yaxis: {title: 'η₂', range: [-3, 3], scaleanchor: 'x', scaleratio: 1, zeroline: false},
+                xaxis2: {title: 'θ₁', range: [-10, 10], zeroline: false}, yaxis2: {title: 'θ₂', range: [-10, 10], scaleanchor: 'x2', scaleratio: 1, zeroline: false},
+                margin: {t:40, b:10, l:40, r:40}
+            });
+        }
+
+        function drawErgodicitySimulation() {
+            const samplesPerBatch = parseInt(document.getElementById('ergo-samples').value);
+            const delaySteps = parseInt(document.getElementById('ergo-delay').value);
+            const numBatches = parseInt(document.getElementById('ergo-batches').value);
+            const potential = document.getElementById('ergo-potential').value;
+            const dt_val = parseFloat(document.getElementById('ergo-dt').value);
+            const dt = Math.pow(10, dt_val);
+
+            let x = 2.0; 
+            let batches = [];
+
+            for (let b = 0; b < numBatches; b++) {
+                let currentBatch = [];
+                for (let i = 0; i < samplesPerBatch; i++) {
+                    for(let j = 0; j < delaySteps; j++) {
+                        let grad = 0;
+                        if (potential === 'log') {
+                            grad = (2 * x) / (1 + x * x);
+                        } else {
+                            grad = 0.5 * Math.sign(x) / Math.sqrt(Math.abs(x) + 0.001);
+                        }
+                        x += -grad * dt + Math.sqrt(2 * dt) * randn();
+                    }
+                    currentBatch.push(x);
+                }
+                const kdeData = currentBatch.filter((_, idx) => idx % Math.ceil(samplesPerBatch/2000) === 0);
+                batches.push(kdeData);
+            }
+
+            let theory_x = [], theory_y = [];
+            for(let i=-6; i<=6; i+=0.1) {
+                theory_x.push(i);
+                if (potential === 'log') theory_y.push(1 / (Math.PI * (1 + i * i)));
+                else theory_y.push(0.25 * Math.exp(-Math.sqrt(Math.abs(i))));
+            }
+
+            let traces = [];
+            const opacityStep = 0.8 / numBatches;
+            for (let b = 0; b < numBatches; b++) {
+                let kde = gaussianKDE(0.5, batches[b], theory_x);
+                traces.push({
+                    type: 'scatter', mode: 'lines', x: theory_x, y: kde, name: `Batch ${b+1}`, line: { color: `rgba(59, 130, 246, ${0.2 + b * opacityStep})`, width: 2 }
+                });
+            }
+            traces.push({
+                type: 'scatter', mode: 'lines', x: theory_x, y: theory_y, name: 'π (Theory)', line: {color: '#10b981', width: 3}
+            });
+
+            Plotly.newPlot('vis-ergodicity', traces, {
+                title: 'Empirical Measure Convergence', margin: {t:40, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.15 }
+            });
+        }
+
+        function drawScalingLimitsSimulation() {
+            const alpha = parseFloat(document.getElementById('scaling-alpha').value);
+            const steps = parseInt(document.getElementById('scaling-steps').value);
+            const T = parseFloat(document.getElementById('scaling-time').value);
+
+            const dt = T / steps;
+            let g_x = [0], g_y = [0], l_x = [0], l_y = [0];
+            
+            for(let i=0; i<steps; i++) {
+                g_x.push(g_x[i] + randn() * Math.sqrt(dt));
+                g_y.push(g_y[i] + randn() * Math.sqrt(dt));
+
+                let dl_x = alphaStable(alpha) * Math.pow(dt, 1/alpha);
+                let dl_y = alphaStable(alpha) * Math.pow(dt, 1/alpha);
+                dl_x = Math.max(-1, Math.min(1, dl_x));
+                dl_y = Math.max(-1, Math.min(1, dl_y));
+
+                l_x.push(l_x[i] + dl_x);
+                l_y.push(l_y[i] + dl_y);
+            }
+
+            Plotly.newPlot('vis-scaling-limits', [
+                { type: 'scatter', mode: 'lines', x: g_x, y: g_y, name: 'Gaussian (Dense)', line: {color: '#1e3a8a', width: 1.5} },
+                { type: 'scatter', mode: 'markers', x: l_x, y: l_y, name: `Lévy (Sparse α=${alpha})`, marker: {color: '#7f1d1d', size: 3} }
+            ], { 
+                title: '2D Path Limit', margin: {t:40, b:10, l:30, r:30}, xaxis: {scaleanchor: 'y', scaleratio: 1}, legend: { orientation: 'h', y: -0.15 }
+            });
+        }
+
+        function drawHypothesisSpace() {
+            Plotly.newPlot('vis-architecture-loss', [
+                { type: 'scatter', mode: 'lines', x: [Math.cos(0), Math.cos(2), Math.cos(4), Math.cos(6), Math.cos(0)], y: [Math.sin(0), Math.sin(2), Math.sin(4), Math.sin(6), Math.sin(0)], line: {shape: 'spline', color: '#94a3b8'}, fill: 'toself', opacity: 0.2, name: 'Class H' },
+                { type: 'scatter', mode: 'markers+text', x: [1.5], y: [1.5], marker: {size: 10, color: '#10b981'}, text: ['True f*'], textposition: 'top center', textfont: {color: 'black', weight: 'bold'}, name: 'Global Optimum' },
+                { type: 'scatter', mode: 'markers+text', x: [0.8], y: [0.8], marker: {size: 10, color: '#3b82f6'}, text: ['Best h in H'], textposition: 'bottom right', textfont: {color: 'black', weight: 'bold'}, name: 'Best Projection' },
+                { type: 'scatter', mode: 'markers+text', x: [0.2], y: [0.4], marker: {size: 10, color: '#ef4444'}, text: ['ERM ĥ'], textposition: 'bottom center', textfont: {color: 'black', weight: 'bold'}, name: 'ERM' }
+            ], { title: 'ERM Search within Hypothesis Class', margin: {t:40, b:10, l:10, r:10}, legend: { orientation: 'h', y: -0.1 }, xaxis: {showgrid: false, zeroline: false, visible: false}, yaxis: {showgrid: false, zeroline: false, visible: false}});
+        }
+
+        function drawGeneralizationGap() {
+            let x_grid = [], y_grid = [], z_pop = [], z_emp = [];
+            for(let i = -3; i <= 3; i+=0.1) {
+                x_grid.push(i); y_grid.push(i);
+            }
+            for(let j = 0; j < y_grid.length; j++) {
+                let row_pop = [], row_emp = [];
+                for(let i = 0; i < x_grid.length; i++) {
+                    let x = x_grid[i], y = y_grid[j];
+                    let j_val = 0.5 * (x*x + y*y) + 0.5 * Math.sin(2*x) + 0.5 * Math.sin(2*y) + 2;
+                    row_pop.push(j_val);
+                    let spurious = 1.5 * Math.exp(-8*(Math.pow(x-1.5, 2) + Math.pow(y-1.5, 2)));
+                    row_emp.push(j_val - spurious);
+                }
+                z_pop.push(row_pop); z_emp.push(row_emp);
+            }
+
+            let true_min_x = -0.5, true_min_y = -0.5, erm_min_x = 1.5, erm_min_y = 1.5;
+            let z_true = 0.5*(true_min_x*true_min_x + true_min_y*true_min_y) + 0.5*Math.sin(2*true_min_x) + 0.5*Math.sin(2*true_min_y) + 2;
+            let z_erm = 0.5*(erm_min_x*erm_min_x + erm_min_y*erm_min_y) + 0.5*Math.sin(2*erm_min_x) + 0.5*Math.sin(2*erm_min_y) + 2 - 1.5;
+
+            Plotly.newPlot('vis-generalization', [
+                { type: 'surface', x: x_grid, y: y_grid, z: z_pop, colorscale: 'Blues', opacity: 0.6, showscale: false, name: 'Population Risk J' },
+                { type: 'surface', x: x_grid, y: y_grid, z: z_emp, colorscale: 'Portland', opacity: 0.9, showscale: false, name: 'Empirical Risk L' },
+                { type: 'scatter3d', mode: 'markers+text', x: [true_min_x], y: [true_min_y], z: [z_true], marker: {size: 6, color: '#10b981'}, text: ['θ* (True Min)'], textposition: 'top center', textfont: {color: 'black', size: 14, weight: 'bold'}, name: 'Population Min' },
+                { type: 'scatter3d', mode: 'markers+text', x: [erm_min_x], y: [erm_min_y], z: [z_erm], marker: {size: 6, color: '#ef4444'}, text: ['θ̂ (ERM Min)'], textposition: 'bottom center', textfont: {color: 'black', size: 14, weight: 'bold'}, name: 'Empirical Min' }
+            ], { title: 'Population Risk vs Empirical Risk', margin: {t:40, b:10, l:10, r:10}, scene: { zaxis: { range: [0, 8] } }, legend: { orientation: 'h', y: -0.1 }});
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            drawGDFlowSimulation();
+            drawHypothesisSpace();
+            drawGeneralizationGap();
+            drawGeometries();
+            drawSGDSimulation();
+            drawOptimizers();
+            drawStochasticOptimizers();
+            drawHamiltonian();
+            drawLangevinSimulation();
+            drawLangevinSimulation2();
+            drawDiffeo();
+            drawErgodicitySimulation();
+            drawScalingLimitsSimulation();
+
+            document.getElementById('gd-lr').addEventListener('input', () => { document.getElementById('gd-lr-val').innerText = parseFloat(document.getElementById('gd-lr').value).toFixed(3); });
+            document.getElementById('gd-steps').addEventListener('input', () => { document.getElementById('gd-steps-val').innerText = document.getElementById('gd-steps').value; });
+            document.getElementById('gd-start-x').addEventListener('input', () => { document.getElementById('gd-start-x-val').innerText = parseFloat(document.getElementById('gd-start-x').value).toFixed(1); });
+            document.getElementById('gd-start-y').addEventListener('input', () => { document.getElementById('gd-start-y-val').innerText = parseFloat(document.getElementById('gd-start-y').value).toFixed(1); });
+            
+            document.getElementById('opt-c1').addEventListener('input', () => { document.getElementById('opt-c1-val').innerText = parseFloat(document.getElementById('opt-c1').value).toFixed(2); });
+            document.getElementById('opt-c2').addEventListener('input', () => { document.getElementById('opt-c2-val').innerText = parseFloat(document.getElementById('opt-c2').value).toFixed(1); });
+            document.getElementById('opt-lr').addEventListener('input', () => { document.getElementById('opt-lr-val').innerText = parseFloat(document.getElementById('opt-lr').value).toFixed(2); });
+            document.getElementById('opt-start-x').addEventListener('input', () => { document.getElementById('opt-start-x-val').innerText = parseFloat(document.getElementById('opt-start-x').value).toFixed(1); });
+            document.getElementById('opt-start-y').addEventListener('input', () => { document.getElementById('opt-start-y-val').innerText = parseFloat(document.getElementById('opt-start-y').value).toFixed(1); });
+            document.getElementById('opt-steps').addEventListener('input', () => { document.getElementById('opt-steps-val').innerText = document.getElementById('opt-steps').value; });
+            document.getElementById('opt-noise').addEventListener('input', () => { document.getElementById('opt-noise-val').innerText = parseFloat(document.getElementById('opt-noise').value).toFixed(1); });
+
+            document.getElementById('sgd-noise').addEventListener('input', () => { document.getElementById('sgd-noise-val').innerText = parseFloat(document.getElementById('sgd-noise').value).toFixed(1); });
+            document.getElementById('sgd-lr').addEventListener('input', () => { document.getElementById('sgd-lr-val').innerText = parseFloat(document.getElementById('sgd-lr').value).toFixed(2); });
+            document.getElementById('sgd-start-x').addEventListener('input', () => { document.getElementById('sgd-start-x-val').innerText = parseFloat(document.getElementById('sgd-start-x').value).toFixed(1); });
+            
+            document.getElementById('ham-c').addEventListener('input', () => { document.getElementById('ham-c-val').innerText = parseFloat(document.getElementById('ham-c').value).toFixed(1); });
+            document.getElementById('ham-start-x').addEventListener('input', () => { document.getElementById('ham-start-x-val').innerText = parseFloat(document.getElementById('ham-start-x').value).toFixed(1); });
+            document.getElementById('ham-start-y').addEventListener('input', () => { document.getElementById('ham-start-y-val').innerText = parseFloat(document.getElementById('ham-start-y').value).toFixed(1); });
+            document.getElementById('ham-steps').addEventListener('input', () => { document.getElementById('ham-steps-val').innerText = document.getElementById('ham-steps').value; });
+            document.getElementById('ham-dt').addEventListener('input', () => { document.getElementById('ham-dt-val').innerText = parseFloat(document.getElementById('ham-dt').value).toFixed(3); });
+            document.getElementById('ham-temp').addEventListener('input', () => { document.getElementById('ham-temp-val').innerText = parseFloat(document.getElementById('ham-temp').value).toFixed(1); });
+            document.getElementById('ham-gamma').addEventListener('input', () => { document.getElementById('ham-gamma-val').innerText = parseFloat(document.getElementById('ham-gamma').value).toFixed(1); });
+
+            document.getElementById('levy-alpha-1').addEventListener('input', () => { document.getElementById('levy-alpha-val-1').innerText = parseFloat(document.getElementById('levy-alpha-1').value).toFixed(1); });
+            document.getElementById('levy-steps-1').addEventListener('input', () => { document.getElementById('levy-steps-val-1').innerText = document.getElementById('levy-steps-1').value; });
+            
+            document.getElementById('levy-alpha-2').addEventListener('input', () => { document.getElementById('levy-alpha-val-2').innerText = parseFloat(document.getElementById('levy-alpha-2').value).toFixed(1); });
+            document.getElementById('levy-steps-2').addEventListener('input', () => { document.getElementById('levy-steps-val-2').innerText = document.getElementById('levy-steps-2').value; });
+
+            document.getElementById('diffeo-c').addEventListener('input', () => { document.getElementById('diffeo-c-val').innerText = parseFloat(document.getElementById('diffeo-c').value).toFixed(2); });
+
+            document.getElementById('ergo-dt').addEventListener('input', () => { 
+                document.getElementById('ergo-dt-val').innerText = Math.pow(10, parseFloat(document.getElementById('ergo-dt').value)).toFixed(4); 
+            });
+            document.getElementById('ergo-samples').addEventListener('input', () => { document.getElementById('ergo-samples-val').innerText = document.getElementById('ergo-samples').value; });
+            document.getElementById('ergo-delay').addEventListener('input', () => { document.getElementById('ergo-delay-val').innerText = document.getElementById('ergo-delay').value; });
+            document.getElementById('ergo-batches').addEventListener('input', () => { document.getElementById('ergo-batches-val').innerText = document.getElementById('ergo-batches').value; });
+            
+            document.getElementById('scaling-alpha').addEventListener('input', () => { document.getElementById('scaling-alpha-val').innerText = parseFloat(document.getElementById('scaling-alpha').value).toFixed(1); });
+            document.getElementById('scaling-steps').addEventListener('input', () => { document.getElementById('scaling-steps-val').innerText = document.getElementById('scaling-steps').value; });
+            document.getElementById('scaling-time').addEventListener('input', () => { document.getElementById('scaling-time-val').innerText = parseFloat(document.getElementById('scaling-time').value).toFixed(1); });
+
+            document.getElementById('mobile-menu-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); });
+            document.getElementById('close-sidebar-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.add('-translate-x-full'); });
+            document.getElementById('floating-menu-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('sidebar-collapsed'); });
+            
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('href').substring(1);
+                    document.getElementById(targetId).scrollIntoView({ behavior: 'smooth' });
+                    if(window.innerWidth < 768){
+                        document.getElementById('sidebar').classList.add('-translate-x-full');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
