@@ -140,7 +140,7 @@
             <p class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Interactive Presentation</p>
             <p class="text-xs text-slate-500 mt-2">Jorge Ignacio González Cázares (IIMAS-UNAM, Mexico)</p>
         </div>
-        <nav class="flex-1 px-4 pb-6 space-y-1 mt-4" id="nav-menu">
+        <nav class="flex-1 px-4 pb-4 space-y-1 mt-4" id="nav-menu">
             <a href="#deterministic-foundations" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-compass-drafting text-sky-400 w-6"></i> 1. Deterministic Foundations</a>
             <a href="#statistical-learning" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-brain text-rose-400 w-6"></i> 2. Statistical Learning</a>
             <a href="#optimization-geometries" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-mountain text-emerald-400 w-6"></i> 3. Geometries & SGD</a>
@@ -150,13 +150,19 @@
             <a href="#continuous-limits" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-wave-square text-amber-400 w-6"></i> 7. Continuous Limits</a>
             <a href="#references" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-book text-slate-400 w-6"></i> References</a>
         </nav>
+        <div class="mt-4 mb-8 flex flex-col items-center justify-center px-4">
+            <p class="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-bold">Presentation Link</p>
+            <div class="bg-white p-2 rounded-lg shadow-sm">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://jorgeignaciogc.github.io/SGD-SDE/" alt="QR Code to Presentation" class="w-24 h-24">
+            </div>
+        </div>
     </aside>
 
     <main class="flex-1 w-full max-w-5xl mx-auto p-6 md:p-10 lg:p-14 overflow-x-hidden">
         
         <header class="mb-16 border-b border-slate-200 pb-8">
             <h1 class="text-4xl md:text-5xl font-bold text-slate-900 serif leading-tight mb-4">Machine Learning, Stochastic Optimization and Connections with SDEs</h1>
-            <p class="text-lg text-slate-600"><b>Jorge Ignacio González Cázares</b></p>
+            <p class="text-lg text-slate-600"><b>Jorge Ignacio González Cázares (IIMAS-UNAM, México)</b></p>
         </header>
 
         <!-- Part 1: Deterministic Optimization Foundations -->
@@ -262,7 +268,7 @@
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
                 <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-microchip text-rose-500 mr-2"></i> Function Classes & Empirical Risk Minimization</h3>
                 <div class="bg-rose-50 border-l-4 border-rose-400 p-4 mb-4 rounded-r-lg">
-                    <strong>Intuition:</strong> Why does machine learning reduce to optimization? To teach a computer to map inputs to outputs, we first select a "blank slate" (a specific family of mathematical functions controlled by tunable parameters). Learning is the act of twisting these parameter dials to find the specific function within the family that makes the fewest errors on average.
+                    <strong>Intuition:</strong> Why does machine learning reduce to optimization? To teach a computer to map inputs to outputs, we first select a "blank slate"—a specific family of mathematical functions (an architecture) controlled by tunable dials (parameters). Learning is the act of twisting these dials to find the specific function within the family that makes the fewest errors on average.
                 </div>
                 <div class="math-box">
                     <strong>Neural Networks as Function Classes:</strong> A neural network defines a hypothesis class $\mathcal{H}$ through nested linear transformations and non-linear activation functions. For an input $x$, a feedforward network of depth $L$ is mathematically expressed as:
@@ -282,7 +288,7 @@
                     <button class="btn-action mx-auto" onclick="drawHypothesisSpace()">Redraw Hypothesis Space Diagram</button>
                 </div>
                 <div id="vis-architecture-loss" class="vis-container h-[400px]"></div>
-                <div class="text-sm text-center text-slate-500 mt-2 italic">A representation of Empirical Risk Minimization restricting the global search strictly to the parameterized hypothesis class.</div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">A representation of Empirical Risk Minimization restricting the global search strictly to the parameterized hypothesis class (the boundary is defined by the unit circle mapped into space).</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
@@ -345,7 +351,7 @@
                 <div class="math-box">
                     <strong>Mini-Batch Estimation:</strong> In deep learning, calculating the exact empirical gradient requires evaluating every point:
                     $$ \nabla L(\theta) = \frac{1}{N} \sum_{i=1}^N \nabla \ell(h_\theta(x_i), y_i) $$
-                    This is an expensive $\mathcal{O}(N)$ operation. We replace the true gradient with an unbiased estimator calculated over a small random subset $\mathcal{B} \subset \mathcal{S}$ of size $B$ (a <em>mini-batch</em>). This dramatically reduces computational cost per step while ensuring the expectation of the stochastic gradient matches the full-batch gradient: $\mathbb{E}[g_n \mid \mathcal{F}_n] = \nabla L(\theta_n)$.
+                    This is an expensive $\mathcal{O}(N)$ operation. We replace the true gradient with an unbiased estimator calculated over a small random subset $\mathcal{B} \subset \mathcal{S}$ of size $B$ (a mini-batch). This dramatically reduces computational cost per step while ensuring the expectation of the stochastic gradient matches the full-batch gradient: $\mathbb{E}[g_n \mid \mathcal{F}_n] = \nabla L(\theta_n)$.
                     <hr class="my-3 border-slate-300">
                     <strong>Update Rule:</strong> 
                     $$ \theta_{n+1} = \theta_n - \eta_n g_n $$
@@ -396,7 +402,7 @@
                 <div class="math-box">
                     <strong>The Escape Time Problem:</strong> The optimal clip size $c$ depends entirely on the minimal number of steps of size $c$ required to escape a specific basin of attraction. Computing this requires global topographical knowledge of the loss landscape, rendering systematic tuning impractical.
                     <hr class="my-3 border-slate-300">
-                    <strong>Tuning-Free Robustness:</strong> In ongoing work by Mario Molina and myself, we replace clipped mean estimation with a Median-of-Means (MoM) approach. By randomly partitioning the mini-batch into subgroups, computing the mean gradient of each subgroup, and taking the spatial median of those means, the estimator achieves asymptotic robustness to heavy-tailed noise. This neutralizes gradient explosions and preserves flat minima preferences without requiring the calculation of $c$.
+                    <strong>Tuning-Free Robustness:</strong> In ongoing work, Mario Molina and myself replace clipped mean estimation with a Median-of-Means (MoM) approach. By randomly partitioning the mini-batch into subgroups, computing the mean gradient of each subgroup, and taking the spatial median of those means, the estimator achieves asymptotic robustness to heavy-tailed noise. This neutralizes gradient explosions and preserves flat minima preferences without requiring the calculation of $c$.
                 </div>
             </div>
 
@@ -509,20 +515,19 @@
                 
                 <div class="controls-bar mt-4">
                     <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
-                        <strong>Double-Well Landscape:</strong> $U(x,y) = (x^2 - 4)^2 + c y^2$<br>
-                        <strong>Gradient:</strong> $\nabla U(x,y) = \begin{bmatrix} 4x(x^2 - 4) \\ 2cy \end{bmatrix}$
+                        <strong>Landscape:</strong> Rosenbrock-style curved valley $U(x,y) = (1-x)^2 + c(y-x^2)^2$
                     </div>
                     <div class="input-group">
                         <label for="ham-c">Steepness y-axis (c): <span id="ham-c-val">5.0</span></label>
                         <input type="range" id="ham-c" min="1.0" max="15.0" step="1.0" value="5.0">
                     </div>
                     <div class="input-group">
-                        <label for="ham-start-x">Start X: <span id="ham-start-x-val">0.5</span></label>
-                        <input type="range" id="ham-start-x" min="-3.0" max="3.0" step="0.5" value="0.5">
+                        <label for="ham-start-x">Start X: <span id="ham-start-x-val">-2.0</span></label>
+                        <input type="range" id="ham-start-x" min="-4.0" max="4.0" step="0.5" value="-2.0">
                     </div>
                     <div class="input-group">
-                        <label for="ham-start-y">Start Y: <span id="ham-start-y-val">3.0</span></label>
-                        <input type="range" id="ham-start-y" min="-3.0" max="3.0" step="0.5" value="3.0">
+                        <label for="ham-start-y">Start Y: <span id="ham-start-y-val">8.0</span></label>
+                        <input type="range" id="ham-start-y" min="-2.0" max="12.0" step="0.5" value="8.0">
                     </div>
                     <div class="input-group">
                         <label for="ham-steps">Steps: <span id="ham-steps-val">1000</span></label>
@@ -1117,17 +1122,17 @@
             const startX = parseFloat(document.getElementById('sgd-start-x').value);
 
             let x_vals = [], y_vals = [];
-            for(let i = -20.0; i <= 20.0; i+=0.2) {
+            for(let i = -10.0; i <= 10.0; i+=0.1) {
                 x_vals.push(i);
                 y_vals.push(fourMode(i));
             }
 
             let path_x = [startX], path_y = [fourMode(startX)];
             let currX = startX;
-            for(let i=0; i<200; i++) {
+            for(let i=0; i<100; i++) {
                 let g = gradFourMode(currX) + noise * randn();
                 currX -= lr * g;
-                currX = Math.max(-20.0, Math.min(20.0, currX));
+                currX = Math.max(-10.0, Math.min(10.0, currX));
                 path_x.push(currX);
                 path_y.push(fourMode(currX));
             }
@@ -1515,12 +1520,17 @@
         }
 
         function drawHypothesisSpace() {
+            let circle_x = [], circle_y = [];
+            for(let i=0; i<=2*Math.PI + 0.1; i+=0.1) {
+                circle_x.push(Math.cos(i));
+                circle_y.push(Math.sin(i));
+            }
             Plotly.newPlot('vis-architecture-loss', [
-                { type: 'scatter', mode: 'lines', x: [Math.cos(0), Math.cos(2), Math.cos(4), Math.cos(6), Math.cos(0)], y: [Math.sin(0), Math.sin(2), Math.sin(4), Math.sin(6), Math.sin(0)], line: {shape: 'spline', color: '#94a3b8'}, fill: 'toself', opacity: 0.2, name: 'Class H' },
+                { type: 'scatter', mode: 'lines', x: circle_x, y: circle_y, line: {shape: 'spline', color: '#94a3b8'}, fill: 'toself', opacity: 0.2, name: 'Class H' },
                 { type: 'scatter', mode: 'markers+text', x: [1.5], y: [1.5], marker: {size: 10, color: '#10b981'}, text: ['True f*'], textposition: 'top center', textfont: {color: 'black', weight: 'bold'}, name: 'Global Optimum' },
-                { type: 'scatter', mode: 'markers+text', x: [0.8], y: [0.8], marker: {size: 10, color: '#3b82f6'}, text: ['Best h in H'], textposition: 'bottom right', textfont: {color: 'black', weight: 'bold'}, name: 'Best Projection' },
+                { type: 'scatter', mode: 'markers+text', x: [0.707], y: [0.707], marker: {size: 10, color: '#3b82f6'}, text: ['Best h in H'], textposition: 'bottom right', textfont: {color: 'black', weight: 'bold'}, name: 'Best Projection' },
                 { type: 'scatter', mode: 'markers+text', x: [0.2], y: [0.4], marker: {size: 10, color: '#ef4444'}, text: ['ERM ĥ'], textposition: 'bottom center', textfont: {color: 'black', weight: 'bold'}, name: 'ERM' }
-            ], { title: 'ERM Search within Hypothesis Class', margin: {t:40, b:10, l:10, r:10}, legend: { orientation: 'h', y: -0.1 }, xaxis: {showgrid: false, zeroline: false, visible: false}, yaxis: {showgrid: false, zeroline: false, visible: false}});
+            ], { title: 'ERM Search within Hypothesis Class', margin: {t:40, b:10, l:10, r:10}, legend: { orientation: 'h', y: -0.1 }, xaxis: {showgrid: false, zeroline: false, visible: false, range: [-1.2, 2.0]}, yaxis: {showgrid: false, zeroline: false, visible: false, range: [-1.2, 2.0]}});
         }
 
         function drawGeneralizationGap() {
