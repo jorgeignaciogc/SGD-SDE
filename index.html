@@ -104,6 +104,7 @@
             padding: 0.25rem;
             border-radius: 0.25rem;
             border: 1px solid #cbd5e1;
+            background-color: white;
         }
         
         .btn-action {
@@ -119,6 +120,27 @@
         }
         .btn-action:hover {
             background-color: #4338ca;
+        }
+
+        .flow-box {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            flex: 1;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .flow-box h4 {
+            font-weight: bold;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: #1e293b;
+        }
+        .flow-box p {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin: 0;
         }
     </style>
 </head>
@@ -138,7 +160,7 @@
             </button>
             <h1 class="text-xl font-bold text-white serif leading-tight mb-3 pr-6">Stochastic Optimization & SDEs</h1>
             <p class="text-xs text-slate-400 font-semibold tracking-wide uppercase">Interactive Presentation</p>
-            <p class="text-xs text-slate-500 mt-2">Jorge Ignacio González Cázares (IIMAS-UNAM, Mexico)</p>
+            <p class="text-xs text-slate-500 mt-2">González Cázares (IIMAS-UNAM)</p>
         </div>
         <nav class="flex-1 px-4 pb-4 space-y-1 mt-4" id="nav-menu">
             <a href="#deterministic-foundations" class="nav-link block px-4 py-3 rounded-md hover:bg-slate-800 hover:text-white transition-colors text-sm font-medium"><i class="fa-solid fa-compass-drafting text-sky-400 w-6"></i> 1. Deterministic Foundations</a>
@@ -153,7 +175,7 @@
         <div class="mt-4 mb-8 flex flex-col items-center justify-center px-4">
             <p class="text-[10px] text-slate-500 mb-2 uppercase tracking-wider font-bold">Presentation Link</p>
             <div class="bg-white p-2 rounded-lg shadow-sm">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://jorgeignaciogc.github.io/SGD-SDE/" alt="QR Code to Presentation" class="w-24 h-24">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://jorgeignaciogc.github.io/SGD-SDE/index.html" alt="QR Code to Presentation" class="w-24 h-24">
             </div>
         </div>
     </aside>
@@ -161,8 +183,8 @@
     <main class="flex-1 w-full max-w-5xl mx-auto p-6 md:p-10 lg:p-14 overflow-x-hidden">
         
         <header class="mb-16 border-b border-slate-200 pb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 serif leading-tight mb-4">Machine Learning, Stochastic Optimization and Connections with SDEs and MCMC</h1>
-            <p class="text-lg text-slate-600"><b>Jorge Ignacio González Cázares (IIMAS-UNAM, México)</b></p>
+            <h1 class="text-4xl md:text-5xl font-bold text-slate-900 serif leading-tight mb-4">Machine Learning, Stochastic Optimization and Connections with SDEs</h1>
+            <p class="text-lg text-slate-600"><b>Jorge Ignacio González Cázares</b></p>
         </header>
 
         <!-- Part 1: Deterministic Optimization Foundations -->
@@ -193,7 +215,8 @@
                 <div class="controls-bar">
                     <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
                         <strong>Landscape:</strong> Himmelblau's function $L(x,y) = (x^2+y-11)^2 + (x+y^2-7)^2$<br>
-                        <strong>Gradient:</strong> $\nabla L(x,y) = \begin{bmatrix} 4x(x^2+y-11)+2(x+y^2-7) \\ 2(x^2+y-11)+4y(x+y^2-7) \end{bmatrix}$
+                        <strong>Gradient:</strong> 
+                        $$ \nabla L(x,y) = \begin{bmatrix} 4x(x^2+y-11)+2(x+y^2-7) \\ 2(x^2+y-11)+4y(x+y^2-7) \end{bmatrix} $$
                     </div>
                     <div class="input-group">
                         <label for="gd-lr">Learning Rate (η): <span id="gd-lr-val">0.02</span></label>
@@ -211,7 +234,6 @@
                         <label for="gd-start-y">Start Y: <span id="gd-start-y-val">-2.0</span></label>
                         <input type="range" id="gd-start-y" min="-4" max="4" step="0.1" value="-2.0">
                     </div>
-                    <button class="btn-action ml-auto" onclick="drawGDFlowSimulation()">Recalculate Trajectory</button>
                 </div>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
@@ -268,7 +290,7 @@
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
                 <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-microchip text-rose-500 mr-2"></i> Function Classes & Empirical Risk Minimization</h3>
                 <div class="bg-rose-50 border-l-4 border-rose-400 p-4 mb-4 rounded-r-lg">
-                    <strong>Intuition:</strong> Why does machine learning reduce to optimization? To teach a computer to map inputs to outputs, we first select a "blank slate"—a specific family of mathematical functions (an architecture) controlled by tunable dials (parameters). Learning is the act of twisting these dials to find the specific function within the family that makes the fewest errors on average.
+                    <strong>Intuition:</strong> Why does machine learning reduce to optimization? To teach a computer to map inputs to outputs, we first select a blank slate (a specific family of mathematical functions controlled by tunable parameters). Learning is the act of twisting these parameter dials to find the specific function within the family that makes the fewest errors on average.
                 </div>
                 <div class="math-box">
                     <strong>Neural Networks as Function Classes:</strong> A neural network defines a hypothesis class $\mathcal{H}$ through nested linear transformations and non-linear activation functions. For an input $x$, a feedforward network of depth $L$ is mathematically expressed as:
@@ -284,10 +306,7 @@
                     Because $\mathcal{D}$ is inaccessible, we replace the expected risk with Empirical Risk Minimization (ERM) calculated over a finite, observable training set $\mathcal{S} = \{(x_i, y_i)\}_{i=1}^N$:
                     $$ \hat{\theta} = \arg\min_{\theta \in \mathbb{R}^d} \frac{1}{N} \sum_{i=1}^N \ell(h_\theta(x_i), y_i) $$
                 </div>
-                <div class="controls-bar mt-4">
-                    <button class="btn-action mx-auto" onclick="drawHypothesisSpace()">Redraw Hypothesis Space Diagram</button>
-                </div>
-                <div id="vis-architecture-loss" class="vis-container h-[400px]"></div>
+                <div id="vis-architecture-loss" class="vis-container h-[400px] mt-4"></div>
                 <div class="text-sm text-center text-slate-500 mt-2 italic">A representation of Empirical Risk Minimization restricting the global search strictly to the parameterized hypothesis class (the boundary is defined by the unit circle mapped into space).</div>
             </div>
 
@@ -299,10 +318,7 @@
                 <div class="math-box">
                     <strong>The Generalization Gap:</strong> The difference between the empirical risk $L(\theta)$ and the true population risk $J(\theta)$ is the generalization error. Reaching the exact global minimizer of $L(\theta)$ often causes severe overfitting. Algorithms whose inherent stochastic dynamics drive the parameters away from sharp empirical minima and into flat minima are preferred (Hochreiter & Schmidhuber, 1997, "Flat minima").
                 </div>
-                <div class="controls-bar mt-4">
-                    <button class="btn-action mx-auto" onclick="drawGeneralizationGap()">Redraw Population vs Empirical Risk</button>
-                </div>
-                <div id="vis-generalization" class="vis-container h-[500px]"></div>
+                <div id="vis-generalization" class="vis-container h-[500px] mt-4"></div>
                 <div class="text-sm text-center text-slate-500 mt-2 italic">The true Population Risk (blue) is smooth, but we only have access to the Empirical Risk (solid multi-color), which contains spurious sharp local minima generated by overfitting to finite training data. The Empirical Minimizer sits in a sharp trap, causing high generalization error on the true landscape.</div>
             </div>
         </section>
@@ -328,9 +344,6 @@
                     $$ \ell(\theta_n) - \ell(\theta^*) \leqslant \left(1 - \frac{\mu}{M}\right)^n (\ell(\theta_0) - \ell(\theta^*)) $$
                 </div>
                 
-                <div class="controls-bar">
-                    <button class="btn-action mx-auto" onclick="drawGeometries()">Redraw Geometric Landscapes</button>
-                </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                     <div>
                         <div id="vis-geom-convex" class="vis-container h-[400px]"></div>
@@ -361,25 +374,107 @@
                 
                 <div class="controls-bar">
                     <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
-                        <strong>Landscape (4 Modes):</strong> $U(x) = -3e^{-5(x-2)^2} - 3e^{-5(x+2)^2} - 2.5e^{-0.5(x-6)^2} - 2.5e^{-0.5(x+6)^2} + 0.01x^2$<br>
-                        <strong>Gradient:</strong> $\nabla U(x) = 30(x-2)e^{-5(x-2)^2} + 30(x+2)e^{-5(x+2)^2} + 2.5(x-6)e^{-0.5(x-6)^2} + 2.5(x+6)e^{-0.5(x+6)^2} + 0.02x$
+                        <strong>Landscape (4 Modes):</strong> $U(x) = -3e^{-10(x-2)^2} - 3e^{-10(x+2)^2} - 2.5e^{-0.2(x-6)^2} - 2.5e^{-0.2(x+6)^2} + 0.05x^2$<br>
+                        <strong>Gradient:</strong> 
+                        $$ \nabla U(x) = 60(x-2)e^{-10(x-2)^2} + 60(x+2)e^{-10(x+2)^2} + (x-6)e^{-0.2(x-6)^2} + (x+6)e^{-0.2(x+6)^2} + 0.1x $$
                     </div>
                     <div class="input-group">
                         <label for="sgd-noise">Noise Level (σ): <span id="sgd-noise-val">2.0</span></label>
-                        <input type="range" id="sgd-noise" min="0.0" max="4.0" step="0.1" value="2.0">
+                        <input type="range" id="sgd-noise" min="0.0" max="8.0" step="0.1" value="2.0">
                     </div>
                     <div class="input-group">
                         <label for="sgd-lr">Learning Rate: <span id="sgd-lr-val">0.10</span></label>
-                        <input type="range" id="sgd-lr" min="0.02" max="0.4" step="0.02" value="0.10">
+                        <input type="range" id="sgd-lr" min="0.02" max="0.8" step="0.02" value="0.10">
                     </div>
                     <div class="input-group">
                         <label for="sgd-start-x">Start Position: <span id="sgd-start-x-val">0.0</span></label>
                         <input type="range" id="sgd-start-x" min="-10.0" max="10.0" step="0.5" value="0.0">
                     </div>
-                    <button class="btn-action ml-auto" onclick="drawSGDSimulation()">Recalculate Trajectory</button>
                 </div>
                 <div id="vis-sgd-trajectory" class="vis-container h-[400px] mt-4"></div>
-                <div class="text-sm text-center text-slate-500 mt-2 italic">The SGD path (red) escapes the suboptimal narrow minima at $\pm 2$ and wanders into the wider robust minima at $\pm 6$ due to the injected mini-batch variance.</div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">The SGD path (red) escapes the suboptimal narrow minima at $\pm 2$ and wanders into the wider robust minima at $\pm 6$ due to the injected mini-batch variance. Notice how doubling the noise or learning rate increases volatility.</div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-truck-fast text-emerald-500 mr-2"></i> SGD with Momentum</h3>
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Standard SGD considers only the immediate gradient, which causes it to oscillate wildly across steep ravines and stall on flat plateaus. By accumulating a moving average of past gradients (momentum), the algorithm builds velocity in directions of consistent descent while canceling out erratic oscillations.
+                </div>
+                <div class="math-box">
+                    <strong>Momentum Update Rule:</strong> We introduce a velocity vector $v_n$ and a decay parameter $\beta \in [0, 1)$ (typically $0.9$):
+                    $$ v_{n} = \beta v_{n-1} + g_n $$
+                    $$ \theta_{n+1} = \theta_n - \eta v_n $$
+                    This physically simulates a heavy particle rolling down the loss landscape. The momentum term $\beta v_{n-1}$ forces the trajectory to maintain its previous direction, actively suppressing the high-variance stochastic noise of mini-batch sampling and accelerating convergence through regions with low curvature (Polyak, 1964, "Some methods of speeding up the convergence of iteration methods").
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-arrows-to-dot text-emerald-500 mr-2"></i> AdaGrad & First-Order Variations</h3>
+                <div class="math-box">
+                    <strong>AdaGrad Update Rule:</strong> (Duchi, Hazan, & Singer, 2011, "Adaptive Subgradient Methods"). Let $G_{n,i} = \sum_{t=1}^n g_{t,i}^2$ be the accumulated squared gradient for coordinate $i$. The update scales coordinates inversely to their historical gradients to normalize ill-conditioned landscape curvatures:
+                    $$ \theta_{n+1, i} = \theta_{n, i} - \frac{\eta}{\sqrt{G_{n, i} + \epsilon}} g_{n, i} $$
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-bolt text-emerald-500 mr-2"></i> Adam & Structural Divergence</h3>
+                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> Adam combines Momentum and AdaGrad. Adam is not a second-order Newton proxy. The normalization term strips gradient magnitude rather than capturing true landscape curvature.
+                </div>
+                <div class="math-box">
+                    <strong>Adam Update Rule:</strong> (Kingma & Ba, 2014, "Adam: A Method for Stochastic Optimization"). With decay parameters $\beta_1, \beta_2 \in [0,1)$ and bias corrections $\hat{m}_n, \hat{v}_n$:
+                    $$ m_n = \beta_1 m_{n-1} + (1 - \beta_1) g_n \quad \implies \quad \hat{m}_n = m_n / (1 - \beta_1^n) $$
+                    $$ v_n = \beta_2 v_{n-1} + (1 - \beta_2) (g_n \odot g_n) \quad \implies \quad \hat{v}_n = v_n / (1 - \beta_2^n) $$
+                    $$ \theta_{n+1} = \theta_n - \frac{\eta}{\sqrt{\hat{v}_n} + \epsilon} \odot \hat{m}_n $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>Divergence & Vector Field Distortion:</strong> The exponential decay mechanism causes Adam to diverge or converge to suboptimal points in specific convex settings (Reddi, Kale, & Kumar, 2018, "On the Convergence of Adam and Beyond"). Furthermore, Adam does not universally converge to critical points ($\nabla \ell(\theta) = 0$). It instead converges to the roots of a distinct, algorithm-induced "Adam vector field" (Dereich & Jentzen, 2024, "Convergence rates for the Adam optimizer").
+                </div>
+                
+                <div class="controls-bar mt-4">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Elliptical Landscape with Local Minima:</strong>
+                        $$ U(x,y) = 0.02(x^2 + y^2) - c_1 \exp(-0.2(x-3)^2 - 0.8(y-3)^2) - c_2 \exp(-0.8(x+3)^2 - 0.2(y+3)^2) $$
+                        This presents a broad shallow bowl with two distinct, deep asymmetric pits.
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-c1">Depth Hill 1 (c₁): <span id="opt-c1-val">3.0</span></label>
+                        <input type="range" id="opt-c1" min="1.0" max="6.0" step="0.5" value="3.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-c2">Depth Hill 2 (c₂): <span id="opt-c2-val">2.0</span></label>
+                        <input type="range" id="opt-c2" min="1.0" max="6.0" step="0.5" value="2.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-lr">Learning Rate: <span id="opt-lr-val">0.1</span></label>
+                        <input type="range" id="opt-lr" min="0.01" max="2.0" step="0.01" value="0.1">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-start-x">Start X: <span id="opt-start-x-val">0.0</span></label>
+                        <input type="range" id="opt-start-x" min="-6.0" max="6.0" step="0.5" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-start-y">Start Y: <span id="opt-start-y-val">0.0</span></label>
+                        <input type="range" id="opt-start-y" min="-6.0" max="6.0" step="0.5" value="0.0">
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-steps">Steps: <span id="opt-steps-val">150</span></label>
+                        <input type="range" id="opt-steps" min="50" max="1000" step="10" value="150">
+                    </div>
+                </div>
+                <div id="vis-optimizers" class="vis-container h-[500px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 mb-8 italic">Full-batch deterministic trajectories across asymmetric local minima. Notice how Adam's spatial rescaling allows it to dive directly into deep basins, whereas Vanilla Gradient Descent struggles with flat regions and Momentum frequently overshoots the wells.</div>
+
+                <div class="controls-bar">
+                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
+                        <strong>Stochastic Variants (Mini-Batch Simulation)</strong>
+                    </div>
+                    <div class="input-group">
+                        <label for="opt-noise">Noise Std Dev: <span id="opt-noise-val">0.5</span></label>
+                        <input type="range" id="opt-noise" min="0.0" max="2.0" step="0.1" value="0.5">
+                    </div>
+                </div>
+                <div id="vis-stochastic-optimizers" class="vis-container h-[500px] mt-4"></div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">Stochastic optimization trajectories incorporating additive exogenous noise to simulate mini-batch estimation variance. Adam and Momentum trajectories maintain their structural navigation advantages over standard SGD despite the severe noise injections.</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
@@ -402,78 +497,46 @@
                 <div class="math-box">
                     <strong>The Escape Time Problem:</strong> The optimal clip size $c$ depends entirely on the minimal number of steps of size $c$ required to escape a specific basin of attraction. Computing this requires global topographical knowledge of the loss landscape, rendering systematic tuning impractical.
                     <hr class="my-3 border-slate-300">
-                    <strong>Tuning-Free Robustness:</strong> In ongoing work, Mario Molina and myself replace clipped mean estimation with a Median-of-Means (MoM) approach. By randomly partitioning the mini-batch into subgroups, computing the mean gradient of each subgroup, and taking the spatial median of those means, the estimator achieves asymptotic robustness to heavy-tailed noise. This neutralizes gradient explosions and preserves flat minima preferences without requiring the calculation of $c$.
+                    <strong>Tuning-Free Robustness:</strong> In ongoing work by Mario Molina and the author, we replace clipped mean estimation with a Median-of-Means (MoM) approach. By randomly partitioning the mini-batch into subgroups, computing the mean gradient of each subgroup, and taking the spatial median of those means, the estimator achieves asymptotic robustness to heavy-tailed noise. This neutralizes gradient explosions and preserves flat minima preferences without requiring the calculation of $c$.
                 </div>
             </div>
 
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-arrows-to-dot text-emerald-500 mr-2"></i> AdaGrad & First-Order Variations</h3>
-                <div class="math-box">
-                    <strong>AdaGrad Update Rule:</strong> (Duchi, Hazan, & Singer, 2011, "Adaptive Subgradient Methods", Theorem 5). Let $G_n = \sum_{t=1}^n g_t g_t^\top$ and let $G_{n, ii}$ be the accumulated squared gradient for coordinate $i$. The update scales coordinates inversely to their historical gradients to normalize ill-conditioned landscape curvatures:
-                    $$ \theta_{n+1, i} = \theta_{n, i} - \frac{\eta}{\sqrt{G_{n, ii} + \epsilon}} g_{n, i} $$
+            <!-- New Section: Flow Diagram of Machine Learning Problem -->
+            <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 text-center serif">The Modern Machine Learning Pipeline</h3>
+                <div class="flex flex-col md:flex-row items-stretch justify-between gap-0">
+                    <div class="flow-box border-t-4 border-sky-500 w-[24%]">
+                        <h4>1. Expected Risk</h4>
+                        <p>The true objective: minimize the population error over the unknown data distribution $\mathcal{D}$.</p>
+                    </div>
+                    <div class="flex items-center justify-center w-[2%] py-2 md:py-0">
+                        <i class="fa-solid fa-arrow-right text-slate-400 hidden md:block"></i>
+                        <i class="fa-solid fa-arrow-down text-slate-400 md:hidden"></i>
+                    </div>
+                    <div class="flow-box border-t-4 border-rose-500 w-[24%]">
+                        <h4>2. Empirical Risk</h4>
+                        <p>Substitute the expected risk with the average error evaluated on a finite training dataset $\mathcal{S}$.</p>
+                    </div>
+                    <div class="flex items-center justify-center w-[2%] py-2 md:py-0">
+                        <i class="fa-solid fa-arrow-right text-slate-400 hidden md:block"></i>
+                        <i class="fa-solid fa-arrow-down text-slate-400 md:hidden"></i>
+                    </div>
+                    <div class="flow-box border-t-4 border-emerald-500 w-[24%]">
+                        <h4>3. Stochastic Optimizer</h4>
+                        <p>Apply algorithms like SGD or Adam. The injected noise prevents collapsing into narrow empirical traps.</p>
+                    </div>
+                    <div class="flex items-center justify-center w-[2%] py-2 md:py-0">
+                        <i class="fa-solid fa-arrow-right text-slate-400 hidden md:block"></i>
+                        <i class="fa-solid fa-arrow-down text-slate-400 md:hidden"></i>
+                    </div>
+                    <div class="flow-box border-t-4 border-indigo-500 w-[24%]">
+                        <h4>4. Flat Minima</h4>
+                        <p>Settle near broad, flat valleys. These regions are structurally robust to discrepancies between empirical and true risk.</p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-bolt text-emerald-500 mr-2"></i> Adam & Structural Divergence</h3>
-                <div class="bg-emerald-50 border-l-4 border-emerald-400 p-4 mb-4 rounded-r-lg">
-                    <strong>Intuition:</strong> Adam combines Momentum and AdaGrad. Adam is not a second-order Newton proxy. The normalization term strips gradient magnitude rather than capturing true landscape curvature.
+                <div class="mt-6 text-sm text-slate-600 bg-white p-4 rounded border border-slate-200">
+                    <strong>Pedagogical Note:</strong> Since this is empirical risk minimization, nailing down the exact global minimum of the training data is not only unimportant, it is actively detrimental (overfitting). The stochasticity of the final position, a natural by-product of using a stochastic optimizer, is highly desirable. Unlike classical approximation schemes (such as Robbins-Monro) where learning schedules strictly decay to zero, modern practices keep learning rates bounded away from zero. We want the learning rate to be just small enough that the algorithm gravitates toward local minima, yet large enough that it perpetually fluctuates and bounces out of sharp, unreliable crevices.
                 </div>
-                <div class="math-box">
-                    <strong>Adam Update Rule:</strong> (Kingma & Ba, 2014, "Adam: A Method for Stochastic Optimization"). With decay parameters $\beta_1, \beta_2 \in [0,1)$ and bias corrections $\hat{m}_n, \hat{v}_n$:
-                    $$ m_n = \beta_1 m_{n-1} + (1 - \beta_1) g_n \quad \implies \quad \hat{m}_n = m_n / (1 - \beta_1^n) $$
-                    $$ v_n = \beta_2 v_{n-1} + (1 - \beta_2) (g_n \odot g_n) \quad \implies \quad \hat{v}_n = v_n / (1 - \beta_2^n) $$
-                    $$ \theta_{n+1} = \theta_n - \frac{\eta}{\sqrt{\hat{v}_n} + \epsilon} \odot \hat{m}_n $$
-                    <hr class="my-3 border-slate-300">
-                    <strong>Divergence & Vector Field Distortion:</strong> The exponential decay mechanism causes Adam to diverge or converge to suboptimal points in specific convex settings (Reddi, Kale, & Kumar, 2018, "On the Convergence of Adam and Beyond"). Furthermore, Adam does not universally converge to critical points ($\nabla \ell(\theta) = 0$). It instead converges to the roots of a distinct, algorithm-induced "Adam vector field" (Dereich & Jentzen, 2024, "Convergence rates for the Adam optimizer").
-                </div>
-                
-                <div class="controls-bar mt-4">
-                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
-                        <strong>Elliptical Landscape with Local Minima:</strong> $U(x,y) = 0.02(x^2 + y^2) - c_1 \exp(-0.2(x-3)^2 - 0.8(y-3)^2) - c_2 \exp(-0.8(x+3)^2 - 0.2(y+3)^2)$<br>
-                        This presents a broad shallow bowl with two distinct, deep asymmetric pits.
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-c1">Depth Hill 1 (c₁): <span id="opt-c1-val">3.0</span></label>
-                        <input type="range" id="opt-c1" min="1.0" max="6.0" step="0.5" value="3.0">
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-c2">Depth Hill 2 (c₂): <span id="opt-c2-val">2.0</span></label>
-                        <input type="range" id="opt-c2" min="1.0" max="6.0" step="0.5" value="2.0">
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-lr">Learning Rate: <span id="opt-lr-val">0.1</span></label>
-                        <input type="range" id="opt-lr" min="0.01" max="1.0" step="0.01" value="0.1">
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-start-x">Start X: <span id="opt-start-x-val">0.0</span></label>
-                        <input type="range" id="opt-start-x" min="-6.0" max="6.0" step="0.5" value="0.0">
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-start-y">Start Y: <span id="opt-start-y-val">0.0</span></label>
-                        <input type="range" id="opt-start-y" min="-6.0" max="6.0" step="0.5" value="0.0">
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-steps">Steps: <span id="opt-steps-val">150</span></label>
-                        <input type="range" id="opt-steps" min="50" max="500" step="10" value="150">
-                    </div>
-                    <button class="btn-action ml-auto" onclick="drawOptimizers()">Recalculate Deterministic Paths</button>
-                </div>
-                <div id="vis-optimizers" class="vis-container h-[500px] mt-4"></div>
-                <div class="text-sm text-center text-slate-500 mt-2 mb-8 italic">Full-batch deterministic trajectories across asymmetric local minima. Notice how Adam's spatial rescaling allows it to dive directly into deep basins, whereas Vanilla Gradient Descent struggles with flat regions and Momentum frequently overshoots the wells.</div>
-
-                <div class="controls-bar">
-                    <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
-                        <strong>Stochastic Variants (Mini-Batch Simulation)</strong>
-                    </div>
-                    <div class="input-group">
-                        <label for="opt-noise">Noise Std Dev: <span id="opt-noise-val">0.5</span></label>
-                        <input type="range" id="opt-noise" min="0.0" max="2.0" step="0.1" value="0.5">
-                    </div>
-                    <button class="btn-action ml-auto" onclick="drawStochasticOptimizers()">Recalculate Stochastic Paths</button>
-                </div>
-                <div id="vis-stochastic-optimizers" class="vis-container h-[500px] mt-4"></div>
-                <div class="text-sm text-center text-slate-500 mt-2 italic">Stochastic optimization trajectories incorporating additive exogenous noise to simulate mini-batch estimation variance. Adam and Momentum trajectories maintain their structural navigation advantages over standard SGD despite the severe noise injections.</div>
             </div>
         </section>
 
@@ -483,7 +546,7 @@
                 <span class="text-indigo-600 font-bold tracking-wider uppercase text-sm">Part 4</span>
                 <h2 class="text-3xl font-bold text-slate-900 mt-2 mb-4 serif">Langevin Dynamics & Hamiltonian Principles</h2>
                 <p class="text-base text-slate-600 leading-relaxed">
-                    Treating the loss function as a potential energy landscape $U(\theta) = L(\theta)$ maps discrete optimization updates to continuous-time physical systems.
+                    Treating the loss function as a potential energy landscape $U(\theta) = L(\theta)$ maps discrete optimization updates to continuous-time physical systems. We often have functions we want to sample from but whose shape is irregular. For instance, the posteriors in certain Bayesian models. To this end, we set up Markov processes with these target distributions as invariant measures. One highly popular framework for this is via Overdamped Langevin Dynamics.
                 </p>
             </div>
 
@@ -502,7 +565,7 @@
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
                 <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-meteor text-indigo-500 mr-2"></i> Underdamped Langevin & Hamiltonian Mechanics</h3>
                 <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-4 rounded-r-lg">
-                    <strong>Intuition:</strong> Underdamped Langevin Dynamics (ULD) introduces momentum, allowing the particle to coast through shallow plateaus. ULD breaks the endless orbit of pure Hamiltonian flow through a fluctuation-dissipation balance.
+                    <strong>Intuition:</strong> Why do we need another dynamic if OLD already samples the target? OLD is a purely diffusive, random-walk process. In high dimensions or elongated landscapes, a random walk is agonizingly slow. Underdamped Langevin Dynamics (ULD) introduces physical momentum. This inertia allows the particle to coast smoothly along contours and punch through shallow barriers, transforming a slow random walk into directed, highly efficient exploration. This is precisely why Hamiltonian Monte Carlo (HMC) is the modern gold standard.
                 </div>
                 <div class="math-box">
                     <strong>Formal SDE:</strong> Let $\theta$ represent the position coordinates and $p$ represent the auxiliary momentum variables. For a mass matrix $M$, the Hamiltonian (total energy) is $H(\theta, p) = U(\theta) + \frac{1}{2} p^\top M^{-1} p$. The ULD acts as a stochastic perturbation of the pure Hamiltonian flow:
@@ -515,40 +578,43 @@
                 
                 <div class="controls-bar mt-4">
                     <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
-                        <strong>Landscape:</strong> Rosenbrock-style curved valley $U(x,y) = (1-x)^2 + c(y-x^2)^2$
+                        <strong>Select Potential Landscape:</strong>
+                        <select id="ham-potential" class="mt-1">
+                            <option value="rosenbrock">Rosenbrock Valley: U(x,y) = (1-x)² + c(y-x²)²</option>
+                            <option value="twomode">Two-Mode Basin: U(x,y) = (x²-4)² + cy²</option>
+                        </select>
                     </div>
                     <div class="input-group">
                         <label for="ham-c">Steepness y-axis (c): <span id="ham-c-val">5.0</span></label>
-                        <input type="range" id="ham-c" min="1.0" max="15.0" step="1.0" value="5.0">
+                        <input type="range" id="ham-c" min="1.0" max="20.0" step="1.0" value="5.0">
                     </div>
                     <div class="input-group">
                         <label for="ham-start-x">Start X: <span id="ham-start-x-val">-2.0</span></label>
-                        <input type="range" id="ham-start-x" min="-4.0" max="4.0" step="0.5" value="-2.0">
+                        <input type="range" id="ham-start-x" min="-5.0" max="5.0" step="0.5" value="-2.0">
                     </div>
                     <div class="input-group">
                         <label for="ham-start-y">Start Y: <span id="ham-start-y-val">8.0</span></label>
-                        <input type="range" id="ham-start-y" min="-2.0" max="12.0" step="0.5" value="8.0">
+                        <input type="range" id="ham-start-y" min="-12.0" max="12.0" step="0.5" value="8.0">
                     </div>
                     <div class="input-group">
                         <label for="ham-steps">Steps: <span id="ham-steps-val">1000</span></label>
                         <input type="range" id="ham-steps" min="200" max="3000" step="100" value="1000">
                     </div>
                     <div class="input-group">
-                        <label for="ham-dt">Step Size (dt): <span id="ham-dt-val">0.005</span></label>
-                        <input type="range" id="ham-dt" min="0.001" max="0.02" step="0.001" value="0.005">
+                        <label for="ham-dt">Step Size (dt): <span id="ham-dt-val">0.010</span></label>
+                        <input type="range" id="ham-dt" min="0.001" max="0.02" step="0.001" value="0.010">
                     </div>
                     <div class="input-group">
                         <label for="ham-temp">Temperature (T): <span id="ham-temp-val">0.5</span></label>
                         <input type="range" id="ham-temp" min="0.0" max="2.0" step="0.1" value="0.5">
                     </div>
                     <div class="input-group">
-                        <label for="ham-gamma">Friction (γ): <span id="ham-gamma-val">2.0</span></label>
-                        <input type="range" id="ham-gamma" min="0.1" max="5.0" step="0.1" value="2.0">
+                        <label for="ham-gamma">Friction (γ): <span id="ham-gamma-val">0.5</span></label>
+                        <input type="range" id="ham-gamma" min="0.0" max="2.0" step="0.1" value="0.5">
                     </div>
-                    <button class="btn-action ml-auto" onclick="drawHamiltonian()">Recalculate OLD vs ULD</button>
                 </div>
                 <div id="vis-hamiltonian" class="vis-container h-[500px] mt-4"></div>
-                <div class="text-sm text-center text-slate-500 mt-2 italic">OLD (dark red) diffuses slowly into the nearest minimum basin. ULD (orange) utilizes Hamiltonian momentum to coast and spiral dynamically, accelerating space exploration and crossing flat barriers.</div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">OLD (dark red) diffuses slowly into the nearest minimum basin. ULD (orange, integrated via Leapfrog) utilizes Hamiltonian momentum to coast and spiral dynamically, accelerating space exploration and crossing flat barriers.</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
@@ -577,34 +643,37 @@
                         <label for="levy-steps-1">Steps: <span id="levy-steps-val-1">500</span></label>
                         <input type="range" id="levy-steps-1" min="100" max="1000" step="100" value="500">
                     </div>
-                    <button class="btn-action ml-auto" onclick="drawLangevinSimulation()">Recalculate Double Well Path</button>
                 </div>
                 <div id="vis-langevin-jumps-1" class="vis-container h-[400px] mt-4"></div>
                 <div class="text-sm text-center text-slate-500 mt-2 mb-6 italic">The Brownian path (blue) becomes trapped in local basins, while the heavy-tailed Lévy path (orange) executes large jumps to traverse between modes.</div>
 
                 <div class="controls-bar mt-6">
                     <div class="w-full text-xs text-slate-600 mb-2 border-b border-slate-200 pb-2">
-                        <strong>Four-Mode Landscape:</strong> $U(x) = -3e^{-5(x-2)^2} - 3e^{-5(x+2)^2} - 2.5e^{-0.5(x-6)^2} - 2.5e^{-0.5(x+6)^2} + 0.01x^2$<br>
-                        <strong>Gradient:</strong> $\nabla U(x) = 30(x-2)e^{-5(x-2)^2} + 30(x+2)e^{-5(x+2)^2} + 2.5(x-6)e^{-0.5(x-6)^2} + 2.5(x+6)e^{-0.5(x+6)^2} + 0.02x$
+                        <strong>Asymmetric Narrow & Wide Modes:</strong> 
+                        $$ U(x) = -5\exp(-5(x+2)^2) - 2\exp(-0.2(x-3)^2) + 0.1x^2 $$
+                        <strong>Kernel Density Estimation:</strong> Displays the empirical distribution of the continuous paths.
                     </div>
                     <div class="input-group">
                         <label for="levy-alpha-2">Tail Index (α): <span id="levy-alpha-val-2">1.5</span></label>
                         <input type="range" id="levy-alpha-2" min="1.1" max="2.0" step="0.1" value="1.5">
                     </div>
                     <div class="input-group">
-                        <label for="levy-steps-2">Steps: <span id="levy-steps-val-2">500</span></label>
-                        <input type="range" id="levy-steps-2" min="100" max="1000" step="100" value="500">
+                        <label for="levy-steps-2">Steps: <span id="levy-steps-val-2">10000</span></label>
+                        <input type="range" id="levy-steps-2" min="1000" max="100000" step="1000" value="10000">
                     </div>
-                    <button class="btn-action ml-auto" onclick="drawLangevinSimulation2()">Recalculate Four-Mode Path</button>
+                    <div class="input-group">
+                        <label for="levy-dt-2">Step Size (dt): <span id="levy-dt-val-2">0.05</span></label>
+                        <input type="range" id="levy-dt-2" min="0.001" max="0.1" step="0.001" value="0.05">
+                    </div>
                 </div>
                 <div id="vis-langevin-jumps-2" class="vis-container h-[400px] mt-4"></div>
-                <div class="text-sm text-center text-slate-500 mt-2 italic">In a multi-modal setting, the Lévy-driven diffusion crosses extensive barriers that permanently confine standard Gaussian noise.</div>
+                <div class="text-sm text-center text-slate-500 mt-2 italic">The Kernel Density Estimate (KDE) reveals the structural difference in exploration. OLD (blue) becomes permanently confined to a single mode. L-OLD (orange) leaps between modes, successfully identifying both the sharp, deep minimum at $x = -2$ and the wide, shallow minimum at $x = 3$. The true underlying potential is traced in dotted gray.</div>
             </div>
 
             <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
                 <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-map-location-dot text-indigo-500 mr-2"></i> Diffeomorphic MCMC for Heavy Tails</h3>
                 <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-4 rounded-r-lg">
-                    <strong>Intuition:</strong> Instead of modifying the noise to match heavy tails (which degrades mixing speeds), we can warp the state space itself. By applying an invertible transformation (a diffeomorphism), we map a heavy-tailed target distribution into a light-tailed one.
+                    <strong>Intuition:</strong> While OLD and ULD typically converge exponentially fast if $U$ grows polynomially (light tails), they converge extremely slowly if $U$ grows logarithmically (heavy tails). Instead of modifying the noise to match heavy tails (which degrades mixing speeds), we can warp the state space itself. By applying an invertible transformation (a diffeomorphism), we map a heavy-tailed target distribution into a light-tailed one.
                 </div>
                 <div class="math-box">
                     <strong>Transformation Framework:</strong> Let the original heavy-tailed target measure be $\pi(\theta) \propto \exp(-U(\theta))$. We introduce a diffeomorphism $h: \mathbb{R}^d \to \mathbb{R}^d$ such that $\theta = h(\eta)$. The transformed target measure is $\tilde{\pi}(\eta) \propto \exp(-\tilde{U}(\eta))$, where the new potential includes the log-determinant of the Jacobian:
@@ -622,10 +691,46 @@
                         <label for="diffeo-c">Expansion Rate (c): <span id="diffeo-c-val">0.10</span></label>
                         <input type="range" id="diffeo-c" min="0.0" max="0.3" step="0.01" value="0.10">
                     </div>
-                    <button class="btn-action ml-auto" onclick="drawDiffeo()">Redraw Homeomorphism</button>
                 </div>
                 <div id="vis-diffeo" class="vis-container h-[400px] mt-4"></div>
                 <div class="text-sm text-center text-slate-500 mt-2 italic">Level sets of the isotropic potential (blue circles) map onto exponentially expanded level sets in the target space (red circles), visualizing how the diffeomorphism flattens heavy tails.</div>
+            </div>
+
+            <!-- New Section: Flow Diagram of MCMC Problem -->
+            <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-4 text-center serif">The MCMC Sampling Challenge</h3>
+                <div class="flex flex-col items-center justify-center gap-4">
+                    
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center border-t-4 border-sky-500 w-full md:w-2/3">
+                        <h4 class="font-bold text-slate-800 text-sm">1. The Target Density $\pi(\theta)$</h4>
+                        <p class="text-xs text-slate-500 mt-2">We start with a target density we want to sample from, such as a complex Bayesian posterior. We design an MCMC process with this density as its stationary law, hoping it will converge.</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-down text-slate-400"></i>
+                    
+                    <div class="bg-white p-4 rounded-lg shadow-sm text-center border-t-4 border-rose-500 w-full md:w-2/3">
+                        <h4 class="font-bold text-slate-800 text-sm">2. Overdamped Langevin Dynamics (OLD)</h4>
+                        <p class="text-xs text-slate-500 mt-2">We construct a diffusion process. <strong>The Issue:</strong> If the landscape is multimodal, OLD easily gets trapped in local potential minima. The process must be periodically restarted.</p>
+                    </div>
+                    <i class="fa-solid fa-arrow-down text-slate-400"></i>
+
+                    <div class="flex flex-col md:flex-row gap-4 w-full">
+                        <div class="bg-white p-4 rounded-lg shadow-sm text-center border-t-4 border-amber-500 flex-1">
+                            <h4 class="font-bold text-slate-800 text-sm">3a. Heavy-Tail Jumps (L-OLD)</h4>
+                            <p class="text-xs text-slate-500 mt-2">Introduce jumps to escape local modes. <strong>The Issue:</strong> The invariant law changes and finding the exact new invariant law analytically is extremely difficult.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm text-center border-t-4 border-orange-500 flex-1">
+                            <h4 class="font-bold text-slate-800 text-sm">3b. Hamiltonian Dynamics (ULD)</h4>
+                            <p class="text-xs text-slate-500 mt-2">Introduce physical momentum to coast through barriers with repelling-attracting behaviors. <strong>The Issue:</strong> Can still struggle with excessively heavy tails.</p>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm text-center border-t-4 border-emerald-500 flex-1">
+                            <h4 class="font-bold text-slate-800 text-sm">3c. Diffeomorphic MCMC</h4>
+                            <p class="text-xs text-slate-500 mt-2">Apply a general diffeomorphic transformation. Compress heavy tails down to light-tailed data to drastically accelerate mixing without losing exactness. <strong>The Issue:</strong> Does nothing to address the multimodal problem.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 text-sm text-slate-600 bg-white p-4 rounded border border-slate-200">
+                    <strong>Pedagogical Note:</strong> While OLD provides a mathematically exact stationary distribution, it suffers from poor mixing in complex landscapes. The advanced variants trade off or modify different aspects of the problem, introducing non-local exploration, physical momentum, or geometric warping. Another possible problem is that the tails may be very heavy, making convergence extremely slow. After several attempts at fixing this (e.g., by Roberts with the stereographic projection), Mijatović and Brešar fixed it by a general diffeomorphic transformation that compresses the tails down to light-tailed data. Diffeomorphic MCMC, in particular, highlights a profound truth: sometimes changing the geometry of the space is exponentially more efficient than changing the dynamics of the algorithm.
+                </div>
             </div>
         </section>
 
@@ -712,7 +817,8 @@
                 <div class="math-box">
                     <strong>Formal Definition:</strong> The goal is to find the root $\theta^*$ of an equation $h(\theta) = 0$. When $h(\theta)$ can only be observed via a noisy estimator $H(\theta_n, \xi_{n+1})$ satisfying $\mathbb{E}[H(\theta_n, \xi_{n+1}) \mid \mathcal{F}_n] = h(\theta_n)$, the Robbins-Monro recursion is:
                     $$ \theta_{n+1} = \theta_n - \eta_n H(\theta_n, \xi_{n+1}) $$
-                    where step sizes must satisfy the classical infinite reach and bounded variance conditions (Robbins & Monro, 1951, "A stochastic approximation method", Equation 2): $\sum \eta_n = \infty$ and $\sum \eta_n^2 < \infty$.
+                    where step sizes must satisfy the classical infinite reach and bounded variance conditions (Robbins & Monro, 1951, "A stochastic approximation method"):
+                    $$ \sum_{n=1}^\infty \eta_n = \infty \quad \text{and} \quad \sum_{n=1}^\infty \eta_n^2 < \infty $$
                 </div>
             </div>
 
@@ -722,7 +828,7 @@
                     <strong>Intuition:</strong> Doob's martingale convergence theorem states that any non-negative supermartingale (a system that only loses energy on average) must eventually converge to a finite limit. Optimization algorithms are not strict supermartingales; the stochastic noise occasionally injects "bad" energy, increasing the distance to the optimum. The Robbins-Siegmund theorem mathematically bounds this: as long as these upward energy injections are globally summable over infinite time, the system is guaranteed to "cool down" and converge almost surely.
                 </div>
                 <div class="math-box">
-                    <strong>Formal Property:</strong> For a filtration $\mathcal{F}_n$ and non-negative $\mathcal{F}_n$-measurable variables $V_n, a_n, b_n, c_n$, the conditional drift inequality is (Robbins & Siegmund, 1971, "A convergence theorem", Theorem 1):
+                    <strong>Formal Property:</strong> For a filtration $\mathcal{F}_n$ and non-negative $\mathcal{F}_n$-measurable variables $V_n, a_n, b_n, c_n$, the conditional drift inequality is (Robbins & Siegmund, 1971, "A convergence theorem"):
                     $$ \mathbb{E}[V_{n+1} \mid \mathcal{F}_n] \leqslant (1 + a_n)V_n - b_n + c_n $$
                     If $\sum a_n < \infty$ and $\sum c_n < \infty$ almost surely, then $V_n \xrightarrow{\text{a.s.}} V_\infty < \infty$ and $\sum b_n < \infty$ almost surely. 
                     <hr class="my-3 border-slate-300">
@@ -748,7 +854,7 @@
                     <strong>Intuition:</strong> For continuous-time Markov chains or constant step-size optimization, the noise never completely vanishes. The process reaches a stationary distribution by balancing a strong inward drift from the boundaries against thorough mixing in the center. The landscape's geometry dictates this convergence speed.
                 </div>
                 <div class="math-box">
-                    <strong>Small and Petite Sets:</strong> A set $C \in \mathcal{B}(\mathcal{X})$ is a <em>small set</em> if there exists a time $t > 0$, a constant $\epsilon > 0$, and a probability measure $\nu$ such that the transition kernel satisfies $P_t(x, B) \geqslant \epsilon \nu(B)$ for all $x \in C$ and measurable sets $B$. A set $C$ is a <em>petite set</em> if there exist a probability measure $a$ on $\mathcal{B}(\mathbb{R}_{+})$ and a non-trivial finite measure $\nu_a$ such that $\int_{0}^{\infty}\mathbb{P}_{x}(X_{t}\in\cdot)a(\mathrm{d}t)\geqslant\nu_{a}(\cdot)$ for all $x\in C$ (Meyn & Tweedie, 1993, "Markov Chains and Stochastic Stability", Chapter 5).
+                    <strong>Small and Petite Sets:</strong> A set $C \in \mathcal{B}(\mathcal{X})$ is a <em>small set</em> if there exists a time $t > 0$, a constant $\epsilon > 0$, and a probability measure $\nu$ such that the transition kernel satisfies $P_t(x, B) \geqslant \epsilon \nu(B)$ for all $x \in C$ and measurable sets $B$. A set $C$ is a <em>petite set</em> if there exist a probability measure $a$ on $\mathcal{B}(\mathbb{R}_{+})$ and a non-trivial finite measure $\nu_a$ such that $\int_{0}^{\infty}\mathbb{P}_{x}(X_{t}\in\cdot)a(\mathrm{d}t)\geqslant\nu_{a}(\cdot)$ for all $x\in C$ (Meyn & Tweedie, 1993, "Markov Chains and Stochastic Stability").
                     <hr class="my-3 border-slate-300">
                     <strong>Connection to the Martingale Problem:</strong> The drift condition is fundamentally linked to the martingale problem for the generator $\mathcal{A}$. If the condition were an equality, $\mathcal{A}V(\theta) = 0$, the process $V(X_t)$ would be a local martingale. The inequality $\mathcal{A}V(\theta) \leqslant -\phi(V(\theta)) + b \mathbb{I}_C(\theta)$ therefore measures how far the system's energy $V(X_t)$ is from being a martingale, forcing it to be a supermartingale (actively dissipating energy) whenever the process wanders outside the central set $C$.
                     <hr class="my-3 border-slate-300">
@@ -760,9 +866,10 @@
                     $$ \|\mathbb{P}_x(X_n \in \cdot) - \pi(\cdot)\|_f \leqslant \frac{C V(x)}{r_\star(n)} $$
                     where $r_\star(n) = \phi(H_\phi^{-1}(n))$ and $H_\phi(u) = \int_1^u \frac{1}{\phi(s)}\mathrm{d}s$.
                     <hr class="my-3 border-slate-300">
-                    <strong>Continuous-Time Drift Theorem:</strong> For continuous-time processes, the differential generator condition is identically structured (Douc, Fort, & Guillin, 2009, "Subgeometric rates of convergence", Theorem 3.2):
+                    <strong>Continuous-Time Drift Theorem:</strong> For continuous-time processes, the differential generator condition is identically structured (Douc, Fort, & Guillin, 2009, "Subgeometric rates of convergence"):
                     $$ \mathcal{A}V(\theta) \leqslant -\phi(V(\theta)) + b \mathbb{I}_C(\theta) $$
-                    Yielding the continuous-time bound $\|\mathbb{P}_x(X_t \in \cdot) - \pi(\cdot)\|_f \leqslant \frac{C V(x)}{r_\star(t)}$.
+                    Yielding the continuous-time bound:
+                    $$ \|\mathbb{P}_x(X_t \in \cdot) - \pi(\cdot)\|_f \leqslant \frac{C V(x)}{r_\star(t)} $$
                     <hr class="my-3 border-slate-300">
                     <strong>Proof Outline:</strong> The proof relies on excursion theory and coupling. The drift condition guarantees that, outside the set $C$, the process $V(X_t)$ acts as a supermartingale that decreases at rate $\phi(V)$. Applying Dynkin's formula yields upper bounds on the expected return times to $C$. Once return times are controlled, Nummelin splitting (or generalized coupling) is used to bound the distance to stationarity directly by the tails of these return times.
                 </div>
@@ -789,7 +896,7 @@
                     <strong>Intuition:</strong> When the potential is weakly confining, the restoring force is overpowered by noise. The process wanders, return times become heavy-tailed, and exponential ergodicity breaks.
                 </div>
                 <div class="math-box text-sm m-0 flex-1">
-                    <strong>Submartingale Resistance:</strong> (Brešar & Mijatović, 2024, "Subexponential lower bounds for f-ergodic Markov processes", Theorem 2.1). To rule out a spectral gap and establish subexponential mixing rates, one must identify $V$ and rate functions $\varphi, \Psi$ where, outside a compact set:
+                    <strong>Submartingale Resistance:</strong> (Brešar & Mijatović, 2024, "Subexponential lower bounds for f-ergodic Markov processes"). To rule out a spectral gap and establish subexponential mixing rates, one must identify $V$ and rate functions $\varphi, \Psi$ where, outside a compact set:
                     $$ \frac{1}{V(X_t)} - \int_0^t \varphi\left(\frac{1}{V(X_s)}\right)\mathrm{d}s $$
 		            is a supermartingale and
                     $$ \Psi(V(X_t)) $$
@@ -806,7 +913,7 @@
                     </select>
                 </div>
                 <div class="input-group">
-                    <label for="ergo-dt">Step Size (dt): <span id="ergo-dt-val">0.0500</span></label>
+                    <label for="ergo-dt">Step Size log10(dt): <span id="ergo-dt-val">-1.30</span></label>
                     <input type="range" id="ergo-dt" min="-4.0" max="-0.5" step="0.1" value="-1.3">
                 </div>
                 <div class="input-group">
@@ -856,6 +963,23 @@
                 <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-link text-amber-500 mr-2"></i> Bridging SGD and Langevin Dynamics</h3>
                 <div class="math-box">
                     <strong>Langevin Approximation:</strong> Cheng, Yin, Bartlett, & Jordan (2020, "Stochastic Gradient and Langevin Processes") establish that the trajectory of SGD can be approximated by the continuous-time Overdamped Langevin process. By bounding the Wasserstein distance between the discrete iterates and the continuous diffusion, they prove that SGD inherits the continuous-time mixing properties and convergence guarantees of Langevin systems, allowing us to map optimization rates to diffusion spectral gaps.
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mb-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-3 border-b pb-2"><i class="fa-solid fa-water text-amber-500 mr-2"></i> Mean-Field Limits & Propagation of Chaos</h3>
+                <div class="bg-amber-50 border-l-4 border-amber-400 p-4 mb-4 rounded-r-lg">
+                    <strong>Intuition:</strong> While the exact trajectory of millions of interacting parameters is analytically intractable, as the width of a single hidden layer grows to infinity, the system structurally simplifies. Individual parameters become statistically independent (propagation of chaos), and their discrete empirical distribution converges to a deterministic, macroscopic fluid-like flow.
+                </div>
+                <div class="math-box">
+                    <strong>Formal Continuous Limit:</strong> Consider a two-layer neural network $h_\theta(x) = \frac{1}{N} \sum_{i=1}^N \sigma(x; \theta_i)$. As the number of hidden units $N \to \infty$, the discrete empirical measure of the parameters $\hat{\rho}_N = \frac{1}{N}\sum_{i=1}^N \delta_{\theta_i}$ converges to a continuous probability density $\rho_t(\theta)$.
+                    <hr class="my-3 border-slate-300">
+                    <strong>McKean-Vlasov SDE & Distributional PDE:</strong> The microscopic updates map to macroscopic dynamics where the limiting parameter $\bar{\theta}_t$ evolves according to a McKean-Vlasov SDE (Mei, Montanari, & Nguyen, 2018, "A mean field view of the landscape of two-layer neural networks"):
+                    $$ \mathrm{d}\bar{\theta}_t = -\nabla_\theta \Psi(\bar{\theta}_t; \rho_t) \mathrm{d}t + \sqrt{2T} \mathrm{d}W_t $$
+                    where $\rho_t = \text{Law}(\bar{\theta}_t)$ and $\Psi$ is the functional derivative of the risk. The corresponding non-linear Fokker-Planck equation (continuity equation) governing the density $\rho_t$ is:
+                    $$ \partial_t \rho_t(\theta) = \nabla \cdot (\rho_t(\theta) \nabla \Psi(\theta; \rho_t)) + T \Delta \rho_t(\theta) $$
+                    <hr class="my-3 border-slate-300">
+                    <strong>Optimal Transport & Global Convergence:</strong> This macroscopic evolution is a Wasserstein gradient flow over the space of probability measures. While the microscopic landscape is highly non-convex in $\mathbb{R}^d$, the macroscopic risk functional is convex with respect to the continuous distribution $\rho$. Under appropriate scaling, this flow converges to the global minimum, explaining why over-parameterized networks reliably avoid suboptimal local minima (Chizat & Bach, 2018, "On the global convergence of gradient descent for over-parameterized models using optimal transport").
                 </div>
             </div>
 
@@ -933,6 +1057,7 @@
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Brešar, M., & Mijatović, A. (2024).</b> Subexponential lower bounds for $f$-ergodic Markov processes. <i>Probability Theory and Related Fields</i>.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Brešar, M., & Mijatović, A. (2026).</b> Diffeomorphic Markov Chain Monte Carlo: fast mixing for heavy-tailed distributions. <i>arXiv preprint</i>.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Cheng, X., Yin, D., Bartlett, P. L., & Jordan, M. I. (2020).</b> Stochastic Gradient and Langevin Processes. <i>Proceedings of Machine Learning Research</i>.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Chizat, L., & Bach, F. (2018).</b> On the global convergence of gradient descent for over-parameterized models using optimal transport. <i>Advances in Neural Information Processing Systems</i>, 31.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Dereich, S., & Jentzen, A. (2024).</b> Convergence rates for the Adam optimizer. <i>arXiv preprint arXiv:2407.21078</i>.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Douc, R., Fort, G., & Guillin, A. (2009).</b> Subgeometric rates of convergence of f-ergodic strong Markov processes. <i>Stochastic Processes and their Applications</i>, 119(3), 897-923.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Douc, R., Moulines, E., Priouret, P., & Soulier, P. (2018).</b> <i>Markov Chains</i>. Springer, Cham.</span></li>
@@ -942,6 +1067,7 @@
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Kingma, D. P., & Ba, J. (2014).</b> Adam: A Method for Stochastic Optimization. <i>arXiv preprint arXiv:1412.6980</i>.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Kushner, H. J., & Clark, D. S. (1978).</b> <i>Stochastic Approximation Methods for Constrained and Unconstrained Systems</i>. Springer-Verlag.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Mattingly, J. C., Stuart, A. M., & Higham, D. J. (2002).</b> Ergodicity for SDEs and approximations: locally Lipschitz vector fields and degenerate noise. <i>Stochastic Processes and their Applications</i>, 101(2), 185-232.</span></li>
+                    <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Mei, S., Montanari, A., & Nguyen, P.-M. (2018).</b> A mean field view of the landscape of two-layer neural networks. <i>Proceedings of the National Academy of Sciences</i>, 115(33), E7665-E7671.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Meyn, S. P., & Tweedie, R. L. (1993).</b> <i>Markov Chains and Stochastic Stability</i>. Springer, London.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Molina Palma, M. A., & González Cázares, J. I. (2026).</b> Robust Stochastic Gradient Descent via Median-of-Means Estimators. <i>Ongoing work, IIMAS-UNAM</i>.</span></li>
                     <li class="flex items-start"><i class="fa-solid fa-file-lines text-slate-400 mt-1 mr-3"></i><span><b>Nesterov, Y. (2004).</b> <i>Introductory Lectures on Convex Optimization: A Basic Course</i>. Springer.</span></li>
@@ -997,19 +1123,19 @@
         }
 
         function fourMode(x) {
-            return -3 * Math.exp(-5 * Math.pow(x - 2, 2)) 
-                   -3 * Math.exp(-5 * Math.pow(x + 2, 2)) 
-                   -2.5 * Math.exp(-0.5 * Math.pow(x - 6, 2)) 
-                   -2.5 * Math.exp(-0.5 * Math.pow(x + 6, 2)) 
-                   + 0.01 * x * x;
+            return -3 * Math.exp(-10 * Math.pow(x - 2, 2)) 
+                   -3 * Math.exp(-10 * Math.pow(x + 2, 2)) 
+                   -2.5 * Math.exp(-0.2 * Math.pow(x - 6, 2)) 
+                   -2.5 * Math.exp(-0.2 * Math.pow(x + 6, 2)) 
+                   + 0.05 * x * x;
         }
 
         function gradFourMode(x) {
-            return 30 * (x - 2) * Math.exp(-5 * Math.pow(x - 2, 2)) 
-                   + 30 * (x + 2) * Math.exp(-5 * Math.pow(x + 2, 2)) 
-                   + 2.5 * (x - 6) * Math.exp(-0.5 * Math.pow(x - 6, 2)) 
-                   + 2.5 * (x + 6) * Math.exp(-0.5 * Math.pow(x + 6, 2)) 
-                   + 0.02 * x;
+            return 60 * (x - 2) * Math.exp(-10 * Math.pow(x - 2, 2)) 
+                   + 60 * (x + 2) * Math.exp(-10 * Math.pow(x + 2, 2)) 
+                   + (x - 6) * Math.exp(-0.2 * Math.pow(x - 6, 2)) 
+                   + (x + 6) * Math.exp(-0.2 * Math.pow(x + 6, 2)) 
+                   + 0.1 * x;
         }
 
         function gaussianKDE(bandwidth, data, grid) {
@@ -1031,10 +1157,13 @@
                 return randn() * Math.sqrt(2); 
             }
             let V = (Math.random() - 0.5) * Math.PI;
-            let W = -Math.log(Math.random());
+            V = Math.max(-Math.PI/2 + 0.001, Math.min(Math.PI/2 - 0.001, V));
+            let W = -Math.log(Math.random() + 1e-9);
             let part1 = Math.sin(alpha * V) / Math.pow(Math.cos(V), 1/alpha);
             let part2 = Math.pow(Math.cos(V - alpha * V) / W, (1 - alpha) / alpha);
-            return part1 * part2;
+            let res = part1 * part2;
+            if (!isFinite(res)) return 0;
+            return res;
         }
 
         function drawGeometries() {
@@ -1129,7 +1258,7 @@
 
             let path_x = [startX], path_y = [fourMode(startX)];
             let currX = startX;
-            for(let i=0; i<100; i++) {
+            for(let i=0; i<200; i++) {
                 let g = gradFourMode(currX) + noise * randn();
                 currX -= lr * g;
                 currX = Math.max(-10.0, Math.min(10.0, currX));
@@ -1157,7 +1286,9 @@
             }
             for(let j = 0; j < y_range.length; j++) {
                 let row = [];
-                for(let i = 0; i < x_range.length; i++) row.push(0.02*(x_range[i]*x_range[i] + y_range[j]*y_range[j]) - c1*Math.exp(-0.2*Math.pow(x_range[i]-3,2) - 0.8*Math.pow(y_range[j]-3,2)) - c2*Math.exp(-0.8*Math.pow(x_range[i]+3,2) - 0.2*Math.pow(y_range[j]+3,2)));
+                for(let i = 0; i < x_range.length; i++) {
+                    row.push(0.02*(x_range[i]*x_range[i] + y_range[j]*y_range[j]) - c1*Math.exp(-0.2*Math.pow(x_range[i]-3,2) - 0.8*Math.pow(y_range[j]-3,2)) - c2*Math.exp(-0.8*Math.pow(x_range[i]+3,2) - 0.2*Math.pow(y_range[j]+3,2)));
+                }
                 z_val.push(row);
             }
 
@@ -1204,12 +1335,12 @@
             }
 
             Plotly.newPlot('vis-optimizers', [
-                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Greys', showscale: false },
+                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Greys', showscale: false, ncontours: 60, opacity: 0.3 },
                 { type: 'scatter', mode: 'lines+markers', x: sx, y: sy, name: 'GD', line: {color: '#3b82f6'}, marker: {size:3} },
                 { type: 'scatter', mode: 'lines+markers', x: mx, y: my, name: 'Momentum', line: {color: '#f97316'}, marker: {size:3} },
                 { type: 'scatter', mode: 'lines+markers', x: agx, y: agy, name: 'AdaGrad', line: {color: '#10b981'}, marker: {size:3} },
                 { type: 'scatter', mode: 'lines+markers', x: amx, y: amy, name: 'Adam', line: {color: '#ef4444'}, marker: {size:3} }
-            ], { title: 'Deterministic Optimizer Trajectories', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-15, 15]}, yaxis: {range: [-15, 15]} });
+            ], { title: 'Deterministic Optimizer Trajectories', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-6, 6]}, yaxis: {range: [-6, 6]} });
         }
 
         function drawStochasticOptimizers() {
@@ -1225,7 +1356,9 @@
             for(let i = -15; i <= 15; i+=0.5) { x_range.push(i); y_range.push(i); }
             for(let j = 0; j < y_range.length; j++) {
                 let row = [];
-                for(let i = 0; i < x_range.length; i++) row.push(0.02*(x_range[i]*x_range[i] + y_range[j]*y_range[j]) - c1*Math.exp(-0.2*Math.pow(x_range[i]-3,2) - 0.8*Math.pow(y_range[j]-3,2)) - c2*Math.exp(-0.8*Math.pow(x_range[i]+3,2) - 0.2*Math.pow(y_range[j]+3,2)));
+                for(let i = 0; i < x_range.length; i++) {
+                    row.push(0.02*(x_range[i]*x_range[i] + y_range[j]*y_range[j]) - c1*Math.exp(-0.2*Math.pow(x_range[i]-3,2) - 0.8*Math.pow(y_range[j]-3,2)) - c2*Math.exp(-0.8*Math.pow(x_range[i]+3,2) - 0.2*Math.pow(y_range[j]+3,2)));
+                }
                 z_val.push(row);
             }
 
@@ -1274,12 +1407,12 @@
             }
 
             Plotly.newPlot('vis-stochastic-optimizers', [
-                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Greys', showscale: false },
+                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Greys', showscale: false, ncontours: 60, opacity: 0.3 },
                 { type: 'scatter', mode: 'lines+markers', x: sx, y: sy, name: 'SGD', line: {color: '#3b82f6'}, marker: {size:3} },
                 { type: 'scatter', mode: 'lines+markers', x: mx, y: my, name: 'SGD + Momentum', line: {color: '#f97316'}, marker: {size:3} },
                 { type: 'scatter', mode: 'lines+markers', x: agx, y: agy, name: 'AdaGrad', line: {color: '#10b981'}, marker: {size:3} },
                 { type: 'scatter', mode: 'lines+markers', x: amx, y: amy, name: 'Adam', line: {color: '#ef4444'}, marker: {size:3} }
-            ], { title: 'Stochastic Optimizer Trajectories', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-15, 15]}, yaxis: {range: [-15, 15]} });
+            ], { title: 'Stochastic Optimizer Trajectories', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-6, 6]}, yaxis: {range: [-6, 6]} });
         }
 
         function drawHamiltonian() {
@@ -1290,38 +1423,61 @@
             const dt = parseFloat(document.getElementById('ham-dt').value);
             const T = parseFloat(document.getElementById('ham-temp').value);
             const gamma = parseFloat(document.getElementById('ham-gamma').value);
+            const potentialType = document.getElementById('ham-potential').value;
 
             let x_range = [], y_range = [], z_val = [];
-            for(let i = -5; i <= 5; i+=0.2) { x_range.push(i); }
-            for(let i = -2; i <= 15; i+=0.2) { y_range.push(i); }
+            for(let i = -7; i <= 7; i+=0.2) { x_range.push(i); }
+            for(let i = -15; i <= 15; i+=0.2) { y_range.push(i); }
             for(let j = 0; j < y_range.length; j++) {
                 let row = [];
-                for(let i = 0; i < x_range.length; i++) row.push(Math.pow(1 - x_range[i], 2) + c * Math.pow(y_range[j] - x_range[i]*x_range[i], 2));
+                for(let i = 0; i < x_range.length; i++) {
+                    if(potentialType === 'rosenbrock') {
+                        row.push(Math.pow(1 - x_range[i], 2) + c * Math.pow(y_range[j] - x_range[i]*x_range[i], 2));
+                    } else {
+                        row.push(Math.pow(x_range[i]*x_range[i] - 4, 2) + c * y_range[j]*y_range[j]);
+                    }
+                }
                 z_val.push(row);
             }
 
+            const getHGrad = (x, y) => {
+                if(potentialType === 'rosenbrock') {
+                    return [-2*(1-x) - 4*c*x*(y-x*x), 2*c*(y-x*x)];
+                } else {
+                    return [4*x*(x*x - 4), 2*c*y];
+                }
+            };
+
             let ox = [startX], oy = [startY], cx = startX, cy = startY;
             for(let i=0; i<steps; i++) {
-                let dx = -2*(1-cx) - 4*c*cx*(cy-cx*cx), dy = 2*c*(cy-cx*cx);
+                let [dx, dy] = getHGrad(cx, cy);
                 cx += -dx * dt + Math.sqrt(2 * T * dt) * randn(); 
                 cy += -dy * dt + Math.sqrt(2 * T * dt) * randn();
+                cx = Math.max(-7, Math.min(7, cx)); cy = Math.max(-15, Math.min(15, cy));
                 ox.push(cx); oy.push(cy);
             }
 
             let ux = [startX], uy = [startY], cux = startX, cuy = startY, px = 0, py = 0;
+            let [dx, dy] = getHGrad(cux, cuy);
             for(let i=0; i<steps; i++) {
-                let dx = -2*(1-cux) - 4*c*cux*(cuy-cux*cux), dy = 2*c*(cuy-cux*cux);
-                px += -dx*dt - gamma*px*dt + Math.sqrt(2 * gamma * T * dt) * randn(); 
-                py += -dy*dt - gamma*py*dt + Math.sqrt(2 * gamma * T * dt) * randn();
-                cux += px*dt; cuy += py*dt;
+                px -= 0.5 * dx * dt;
+                py -= 0.5 * dy * dt;
+                cux += px * dt;
+                cuy += py * dt;
+                cux = Math.max(-7, Math.min(7, cux)); cuy = Math.max(-15, Math.min(15, cuy));
                 ux.push(cux); uy.push(cuy);
+
+                let [ndx, ndy] = getHGrad(cux, cuy);
+                px += -0.5 * ndx * dt - gamma * px * dt + Math.sqrt(2 * gamma * T * dt) * randn(); 
+                py += -0.5 * ndy * dt - gamma * py * dt + Math.sqrt(2 * gamma * T * dt) * randn();
+                dx = ndx; dy = ndy;
             }
 
             Plotly.newPlot('vis-hamiltonian', [
-                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Blues', showscale: false },
+                { type: 'contour', x: x_range, y: y_range, z: z_val, colorscale: 'Blues', showscale: false, ncontours: 50, opacity: 0.4 },
                 { type: 'scatter', mode: 'lines', x: ox, y: oy, name: 'OLD', line: {color: '#8b0000', width: 2} },
                 { type: 'scatter', mode: 'lines', x: ux, y: uy, name: 'ULD', line: {color: '#f97316', width: 2} }
-            ], { title: 'Overdamped vs Underdamped Dynamics', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-5, 5]}, yaxis: {range: [-2, 12]} });
+            ], { title: 'Overdamped vs Underdamped Dynamics', margin: {t:30, b:10, l:30, r:30}, legend: { orientation: 'h', y: -0.1 }, xaxis: {range: [-7, 7]}, yaxis: {range: [-15, 15]} });
         }
 
         function drawLangevinSimulation() {
@@ -1357,31 +1513,44 @@
         function drawLangevinSimulation2() {
             const alpha = parseFloat(document.getElementById('levy-alpha-2').value);
             const steps = parseInt(document.getElementById('levy-steps-2').value);
+            const dt = parseFloat(document.getElementById('levy-dt-2').value);
 
-            let t_vals = [0], b_path = [0], l_path = [0];
+            let b_path = [], l_path = [];
             let b_x = 0, l_x = 0;
-            const dt = 0.05;
 
             for(let i=1; i<=steps; i++) {
-                t_vals.push(i * dt);
-                
                 let db = alphaStable(2.0) * Math.sqrt(dt);
-                b_x += -gradFourMode(b_x) * dt + 0.5 * db;
+                let gradB = Math.max(-50, Math.min(50, gradFourMode(b_x)));
+                b_x += -gradB * dt + 0.5 * db;
                 b_x = Math.max(-10, Math.min(10, b_x));
                 b_path.push(b_x);
 
                 let dl = alphaStable(alpha) * Math.pow(dt, 1/alpha);
                 dl = Math.max(-10, Math.min(10, dl));
-                let gradL = Math.max(-20, Math.min(20, gradFourMode(l_x)));
+                let gradL = Math.max(-50, Math.min(50, gradFourMode(l_x)));
                 l_x += -gradL * dt + 0.5 * dl;
                 l_x = Math.max(-10, Math.min(10, l_x));
                 l_path.push(l_x);
             }
 
+            let grid = [];
+            for(let i=-8; i<=8; i+=0.2) grid.push(i);
+            
+            const b_sample = b_path.filter((_, idx) => idx % Math.ceil(steps/5000) === 0);
+            const l_sample = l_path.filter((_, idx) => idx % Math.ceil(steps/5000) === 0);
+
+            let kde_b = gaussianKDE(0.2, b_sample, grid);
+            let kde_l = gaussianKDE(0.2, l_sample, grid);
+            let u_vals = grid.map(x => fourMode(x));
+
             Plotly.newPlot('vis-langevin-jumps-2', [
-                { type: 'scatter', mode: 'lines', x: t_vals, y: b_path, name: 'OLD (α=2)', line: {color: '#3b82f6', width: 1.5} },
-                { type: 'scatter', mode: 'lines', x: t_vals, y: l_path, name: `L-OLD (α=${alpha})`, line: {color: '#f59e0b', width: 1.5} }
-            ], { title: 'Brownian vs. Lévy Paths (Four Modes)', margin: {t:40, b:10, l:30, r:30}, yaxis: { range: [-10, 10] }, legend: { orientation: 'h', y: -0.15 } });
+                { type: 'scatter', mode: 'lines', x: grid, y: kde_b, name: 'OLD KDE', line: {color: '#3b82f6', width: 2}, fill: 'tozeroy' },
+                { type: 'scatter', mode: 'lines', x: grid, y: kde_l, name: `L-OLD KDE`, line: {color: '#f59e0b', width: 2}, fill: 'tozeroy' },
+                { type: 'scatter', mode: 'lines', x: grid, y: u_vals, name: 'Potential U(x)', yaxis: 'y2', line: {color: '#94a3b8', dash: 'dot', width: 2} }
+            ], { 
+                title: 'Empirical Density Over Asymmetric Landscape', margin: {t:40, b:10, l:30, r:40}, legend: { orientation: 'h', y: -0.15 },
+                yaxis2: { overlaying: 'y', side: 'right', showgrid: false, zeroline: false }
+            });
         }
 
         function drawDiffeo() {
@@ -1476,7 +1645,7 @@
             let traces = [];
             const opacityStep = 0.8 / numBatches;
             for (let b = 0; b < numBatches; b++) {
-                let kde = gaussianKDE(0.5, batches[b], theory_x);
+                let kde = gaussianKDE(0.25, batches[b], theory_x);
                 traces.push({
                     type: 'scatter', mode: 'lines', x: theory_x, y: kde, name: `Batch ${b+1}`, line: { color: `rgba(59, 130, 246, ${0.2 + b * opacityStep})`, width: 2 }
                 });
@@ -1542,17 +1711,17 @@
                 let row_pop = [], row_emp = [];
                 for(let i = 0; i < x_grid.length; i++) {
                     let x = x_grid[i], y = y_grid[j];
-                    let j_val = 0.5 * (x*x + y*y) + 0.5 * Math.sin(2*x) + 0.5 * Math.sin(2*y) + 2;
+                    let j_val = 2 + 0.2 * (x*x + y*y) + 0.5 * Math.sin(2*x) + 0.5 * Math.cos(2*y);
                     row_pop.push(j_val);
-                    let spurious = 1.5 * Math.exp(-8*(Math.pow(x-1.5, 2) + Math.pow(y-1.5, 2)));
+                    let spurious = 1.5 * Math.exp(-4*(Math.pow(x-1.5, 2) + Math.pow(y-1.5, 2)));
                     row_emp.push(j_val - spurious);
                 }
                 z_pop.push(row_pop); z_emp.push(row_emp);
             }
 
             let true_min_x = -0.5, true_min_y = -0.5, erm_min_x = 1.5, erm_min_y = 1.5;
-            let z_true = 0.5*(true_min_x*true_min_x + true_min_y*true_min_y) + 0.5*Math.sin(2*true_min_x) + 0.5*Math.sin(2*true_min_y) + 2;
-            let z_erm = 0.5*(erm_min_x*erm_min_x + erm_min_y*erm_min_y) + 0.5*Math.sin(2*erm_min_x) + 0.5*Math.sin(2*erm_min_y) + 2 - 1.5;
+            let z_true = 2 + 0.2*(true_min_x*true_min_x + true_min_y*true_min_y) + 0.5*Math.sin(2*true_min_x) + 0.5*Math.cos(2*true_min_y);
+            let z_erm = 2 + 0.2*(erm_min_x*erm_min_x + erm_min_y*erm_min_y) + 0.5*Math.sin(2*erm_min_x) + 0.5*Math.cos(2*erm_min_y) - 1.5;
 
             Plotly.newPlot('vis-generalization', [
                 { type: 'surface', x: x_grid, y: y_grid, z: z_pop, colorscale: 'Blues', opacity: 0.6, showscale: false, name: 'Population Risk J' },
@@ -1577,49 +1746,176 @@
             drawErgodicitySimulation();
             drawScalingLimitsSimulation();
 
-            document.getElementById('gd-lr').addEventListener('input', () => { document.getElementById('gd-lr-val').innerText = parseFloat(document.getElementById('gd-lr').value).toFixed(3); });
-            document.getElementById('gd-steps').addEventListener('input', () => { document.getElementById('gd-steps-val').innerText = document.getElementById('gd-steps').value; });
-            document.getElementById('gd-start-x').addEventListener('input', () => { document.getElementById('gd-start-x-val').innerText = parseFloat(document.getElementById('gd-start-x').value).toFixed(1); });
-            document.getElementById('gd-start-y').addEventListener('input', () => { document.getElementById('gd-start-y-val').innerText = parseFloat(document.getElementById('gd-start-y').value).toFixed(1); });
+            document.getElementById('gd-lr').addEventListener('input', () => { 
+                document.getElementById('gd-lr-val').innerText = parseFloat(document.getElementById('gd-lr').value).toFixed(3); 
+                drawGDFlowSimulation();
+            });
+            document.getElementById('gd-steps').addEventListener('input', () => { 
+                document.getElementById('gd-steps-val').innerText = document.getElementById('gd-steps').value; 
+                drawGDFlowSimulation();
+            });
+            document.getElementById('gd-start-x').addEventListener('input', () => { 
+                document.getElementById('gd-start-x-val').innerText = parseFloat(document.getElementById('gd-start-x').value).toFixed(1); 
+                drawGDFlowSimulation();
+            });
+            document.getElementById('gd-start-y').addEventListener('input', () => { 
+                document.getElementById('gd-start-y-val').innerText = parseFloat(document.getElementById('gd-start-y').value).toFixed(1); 
+                drawGDFlowSimulation();
+            });
             
-            document.getElementById('opt-c1').addEventListener('input', () => { document.getElementById('opt-c1-val').innerText = parseFloat(document.getElementById('opt-c1').value).toFixed(2); });
-            document.getElementById('opt-c2').addEventListener('input', () => { document.getElementById('opt-c2-val').innerText = parseFloat(document.getElementById('opt-c2').value).toFixed(1); });
-            document.getElementById('opt-lr').addEventListener('input', () => { document.getElementById('opt-lr-val').innerText = parseFloat(document.getElementById('opt-lr').value).toFixed(2); });
-            document.getElementById('opt-start-x').addEventListener('input', () => { document.getElementById('opt-start-x-val').innerText = parseFloat(document.getElementById('opt-start-x').value).toFixed(1); });
-            document.getElementById('opt-start-y').addEventListener('input', () => { document.getElementById('opt-start-y-val').innerText = parseFloat(document.getElementById('opt-start-y').value).toFixed(1); });
-            document.getElementById('opt-steps').addEventListener('input', () => { document.getElementById('opt-steps-val').innerText = document.getElementById('opt-steps').value; });
-            document.getElementById('opt-noise').addEventListener('input', () => { document.getElementById('opt-noise-val').innerText = parseFloat(document.getElementById('opt-noise').value).toFixed(1); });
+            document.getElementById('opt-c1').addEventListener('input', () => { 
+                document.getElementById('opt-c1-val').innerText = parseFloat(document.getElementById('opt-c1').value).toFixed(2); 
+            });
+            document.getElementById('opt-c1').addEventListener('change', drawOptimizers);
+            document.getElementById('opt-c1').addEventListener('change', drawStochasticOptimizers);
 
-            document.getElementById('sgd-noise').addEventListener('input', () => { document.getElementById('sgd-noise-val').innerText = parseFloat(document.getElementById('sgd-noise').value).toFixed(1); });
-            document.getElementById('sgd-lr').addEventListener('input', () => { document.getElementById('sgd-lr-val').innerText = parseFloat(document.getElementById('sgd-lr').value).toFixed(2); });
-            document.getElementById('sgd-start-x').addEventListener('input', () => { document.getElementById('sgd-start-x-val').innerText = parseFloat(document.getElementById('sgd-start-x').value).toFixed(1); });
+            document.getElementById('opt-c2').addEventListener('input', () => { 
+                document.getElementById('opt-c2-val').innerText = parseFloat(document.getElementById('opt-c2').value).toFixed(1); 
+            });
+            document.getElementById('opt-c2').addEventListener('change', drawOptimizers);
+            document.getElementById('opt-c2').addEventListener('change', drawStochasticOptimizers);
+
+            document.getElementById('opt-lr').addEventListener('input', () => { 
+                document.getElementById('opt-lr-val').innerText = parseFloat(document.getElementById('opt-lr').value).toFixed(2); 
+            });
+            document.getElementById('opt-lr').addEventListener('change', drawOptimizers);
+            document.getElementById('opt-lr').addEventListener('change', drawStochasticOptimizers);
+
+            document.getElementById('opt-start-x').addEventListener('input', () => { 
+                document.getElementById('opt-start-x-val').innerText = parseFloat(document.getElementById('opt-start-x').value).toFixed(1); 
+            });
+            document.getElementById('opt-start-x').addEventListener('change', drawOptimizers);
+            document.getElementById('opt-start-x').addEventListener('change', drawStochasticOptimizers);
+
+            document.getElementById('opt-start-y').addEventListener('input', () => { 
+                document.getElementById('opt-start-y-val').innerText = parseFloat(document.getElementById('opt-start-y').value).toFixed(1); 
+            });
+            document.getElementById('opt-start-y').addEventListener('change', drawOptimizers);
+            document.getElementById('opt-start-y').addEventListener('change', drawStochasticOptimizers);
+
+            document.getElementById('opt-steps').addEventListener('input', () => { 
+                document.getElementById('opt-steps-val').innerText = document.getElementById('opt-steps').value; 
+            });
+            document.getElementById('opt-steps').addEventListener('change', drawOptimizers);
+            document.getElementById('opt-steps').addEventListener('change', drawStochasticOptimizers);
+
+            document.getElementById('opt-noise').addEventListener('input', () => { 
+                document.getElementById('opt-noise-val').innerText = parseFloat(document.getElementById('opt-noise').value).toFixed(1); 
+            });
+            document.getElementById('opt-noise').addEventListener('change', drawStochasticOptimizers);
+
+            document.getElementById('sgd-noise').addEventListener('input', () => { 
+                document.getElementById('sgd-noise-val').innerText = parseFloat(document.getElementById('sgd-noise').value).toFixed(1); 
+                drawSGDSimulation();
+            });
+            document.getElementById('sgd-lr').addEventListener('input', () => { 
+                document.getElementById('sgd-lr-val').innerText = parseFloat(document.getElementById('sgd-lr').value).toFixed(2); 
+                drawSGDSimulation();
+            });
+            document.getElementById('sgd-start-x').addEventListener('input', () => { 
+                document.getElementById('sgd-start-x-val').innerText = parseFloat(document.getElementById('sgd-start-x').value).toFixed(1); 
+                drawSGDSimulation();
+            });
             
-            document.getElementById('ham-c').addEventListener('input', () => { document.getElementById('ham-c-val').innerText = parseFloat(document.getElementById('ham-c').value).toFixed(1); });
-            document.getElementById('ham-start-x').addEventListener('input', () => { document.getElementById('ham-start-x-val').innerText = parseFloat(document.getElementById('ham-start-x').value).toFixed(1); });
-            document.getElementById('ham-start-y').addEventListener('input', () => { document.getElementById('ham-start-y-val').innerText = parseFloat(document.getElementById('ham-start-y').value).toFixed(1); });
-            document.getElementById('ham-steps').addEventListener('input', () => { document.getElementById('ham-steps-val').innerText = document.getElementById('ham-steps').value; });
-            document.getElementById('ham-dt').addEventListener('input', () => { document.getElementById('ham-dt-val').innerText = parseFloat(document.getElementById('ham-dt').value).toFixed(3); });
-            document.getElementById('ham-temp').addEventListener('input', () => { document.getElementById('ham-temp-val').innerText = parseFloat(document.getElementById('ham-temp').value).toFixed(1); });
-            document.getElementById('ham-gamma').addEventListener('input', () => { document.getElementById('ham-gamma-val').innerText = parseFloat(document.getElementById('ham-gamma').value).toFixed(1); });
+            document.getElementById('ham-potential').addEventListener('change', drawHamiltonian);
+            document.getElementById('ham-c').addEventListener('input', () => { 
+                document.getElementById('ham-c-val').innerText = parseFloat(document.getElementById('ham-c').value).toFixed(1); 
+            });
+            document.getElementById('ham-c').addEventListener('change', drawHamiltonian);
 
-            document.getElementById('levy-alpha-1').addEventListener('input', () => { document.getElementById('levy-alpha-val-1').innerText = parseFloat(document.getElementById('levy-alpha-1').value).toFixed(1); });
-            document.getElementById('levy-steps-1').addEventListener('input', () => { document.getElementById('levy-steps-val-1').innerText = document.getElementById('levy-steps-1').value; });
+            document.getElementById('ham-start-x').addEventListener('input', () => { 
+                document.getElementById('ham-start-x-val').innerText = parseFloat(document.getElementById('ham-start-x').value).toFixed(1); 
+            });
+            document.getElementById('ham-start-x').addEventListener('change', drawHamiltonian);
+
+            document.getElementById('ham-start-y').addEventListener('input', () => { 
+                document.getElementById('ham-start-y-val').innerText = parseFloat(document.getElementById('ham-start-y').value).toFixed(1); 
+            });
+            document.getElementById('ham-start-y').addEventListener('change', drawHamiltonian);
+
+            document.getElementById('ham-steps').addEventListener('input', () => { 
+                document.getElementById('ham-steps-val').innerText = document.getElementById('ham-steps').value; 
+            });
+            document.getElementById('ham-steps').addEventListener('change', drawHamiltonian);
+
+            document.getElementById('ham-dt').addEventListener('input', () => { 
+                document.getElementById('ham-dt-val').innerText = parseFloat(document.getElementById('ham-dt').value).toFixed(3); 
+            });
+            document.getElementById('ham-dt').addEventListener('change', drawHamiltonian);
+
+            document.getElementById('ham-temp').addEventListener('input', () => { 
+                document.getElementById('ham-temp-val').innerText = parseFloat(document.getElementById('ham-temp').value).toFixed(1); 
+            });
+            document.getElementById('ham-temp').addEventListener('change', drawHamiltonian);
+
+            document.getElementById('ham-gamma').addEventListener('input', () => { 
+                document.getElementById('ham-gamma-val').innerText = parseFloat(document.getElementById('ham-gamma').value).toFixed(1); 
+            });
+            document.getElementById('ham-gamma').addEventListener('change', drawHamiltonian);
+
+            document.getElementById('levy-alpha-1').addEventListener('input', () => { 
+                document.getElementById('levy-alpha-val-1').innerText = parseFloat(document.getElementById('levy-alpha-1').value).toFixed(1); 
+                drawLangevinSimulation();
+            });
+            document.getElementById('levy-steps-1').addEventListener('input', () => { 
+                document.getElementById('levy-steps-val-1').innerText = document.getElementById('levy-steps-1').value; 
+                drawLangevinSimulation();
+            });
             
-            document.getElementById('levy-alpha-2').addEventListener('input', () => { document.getElementById('levy-alpha-val-2').innerText = parseFloat(document.getElementById('levy-alpha-2').value).toFixed(1); });
-            document.getElementById('levy-steps-2').addEventListener('input', () => { document.getElementById('levy-steps-val-2').innerText = document.getElementById('levy-steps-2').value; });
+            document.getElementById('levy-alpha-2').addEventListener('input', () => { 
+                document.getElementById('levy-alpha-val-2').innerText = parseFloat(document.getElementById('levy-alpha-2').value).toFixed(1); 
+            });
+            document.getElementById('levy-alpha-2').addEventListener('change', drawLangevinSimulation2);
 
-            document.getElementById('diffeo-c').addEventListener('input', () => { document.getElementById('diffeo-c-val').innerText = parseFloat(document.getElementById('diffeo-c').value).toFixed(2); });
+            document.getElementById('levy-steps-2').addEventListener('input', () => { 
+                document.getElementById('levy-steps-val-2').innerText = document.getElementById('levy-steps-2').value; 
+            });
+            document.getElementById('levy-steps-2').addEventListener('change', drawLangevinSimulation2);
+
+            document.getElementById('levy-dt-2').addEventListener('input', () => { 
+                document.getElementById('levy-dt-val-2').innerText = parseFloat(document.getElementById('levy-dt-2').value).toFixed(3); 
+            });
+            document.getElementById('levy-dt-2').addEventListener('change', drawLangevinSimulation2);
+
+            document.getElementById('diffeo-c').addEventListener('input', () => { 
+                document.getElementById('diffeo-c-val').innerText = parseFloat(document.getElementById('diffeo-c').value).toFixed(2); 
+                drawDiffeo();
+            });
+
+            document.getElementById('ergo-potential').addEventListener('change', drawErgodicitySimulation);
 
             document.getElementById('ergo-dt').addEventListener('input', () => { 
                 document.getElementById('ergo-dt-val').innerText = Math.pow(10, parseFloat(document.getElementById('ergo-dt').value)).toFixed(4); 
             });
-            document.getElementById('ergo-samples').addEventListener('input', () => { document.getElementById('ergo-samples-val').innerText = document.getElementById('ergo-samples').value; });
-            document.getElementById('ergo-delay').addEventListener('input', () => { document.getElementById('ergo-delay-val').innerText = document.getElementById('ergo-delay').value; });
-            document.getElementById('ergo-batches').addEventListener('input', () => { document.getElementById('ergo-batches-val').innerText = document.getElementById('ergo-batches').value; });
+            document.getElementById('ergo-dt').addEventListener('change', drawErgodicitySimulation);
+
+            document.getElementById('ergo-samples').addEventListener('input', () => { 
+                document.getElementById('ergo-samples-val').innerText = document.getElementById('ergo-samples').value; 
+            });
+            document.getElementById('ergo-samples').addEventListener('change', drawErgodicitySimulation);
+
+            document.getElementById('ergo-delay').addEventListener('input', () => { 
+                document.getElementById('ergo-delay-val').innerText = document.getElementById('ergo-delay').value; 
+            });
+            document.getElementById('ergo-delay').addEventListener('change', drawErgodicitySimulation);
+
+            document.getElementById('ergo-batches').addEventListener('input', () => { 
+                document.getElementById('ergo-batches-val').innerText = document.getElementById('ergo-batches').value; 
+            });
+            document.getElementById('ergo-batches').addEventListener('change', drawErgodicitySimulation);
             
-            document.getElementById('scaling-alpha').addEventListener('input', () => { document.getElementById('scaling-alpha-val').innerText = parseFloat(document.getElementById('scaling-alpha').value).toFixed(1); });
-            document.getElementById('scaling-steps').addEventListener('input', () => { document.getElementById('scaling-steps-val').innerText = document.getElementById('scaling-steps').value; });
-            document.getElementById('scaling-time').addEventListener('input', () => { document.getElementById('scaling-time-val').innerText = parseFloat(document.getElementById('scaling-time').value).toFixed(1); });
+            document.getElementById('scaling-alpha').addEventListener('input', () => { 
+                document.getElementById('scaling-alpha-val').innerText = parseFloat(document.getElementById('scaling-alpha').value).toFixed(1); 
+                drawScalingLimitsSimulation();
+            });
+            document.getElementById('scaling-steps').addEventListener('input', () => { 
+                document.getElementById('scaling-steps-val').innerText = document.getElementById('scaling-steps').value; 
+                drawScalingLimitsSimulation();
+            });
+            document.getElementById('scaling-time').addEventListener('input', () => { 
+                document.getElementById('scaling-time-val').innerText = parseFloat(document.getElementById('scaling-time').value).toFixed(1); 
+                drawScalingLimitsSimulation();
+            });
 
             document.getElementById('mobile-menu-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.toggle('-translate-x-full'); });
             document.getElementById('close-sidebar-btn').addEventListener('click', () => { document.getElementById('sidebar').classList.add('-translate-x-full'); });
